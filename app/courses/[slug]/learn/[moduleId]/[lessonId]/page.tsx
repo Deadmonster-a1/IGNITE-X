@@ -8,9 +8,11 @@ import { python } from "@codemirror/lang-python"
 import { Play, CheckCircle2, XCircle, ChevronRight, Terminal, Loader2, ShieldCheck, Activity, Cpu, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { usePython } from "@/hooks/use-python"
+import { useJava } from "@/hooks/use-java"
 import { TerminalHud } from "@/components/terminal-hud"
 import { CodeFlow } from "@/components/code-flow"
 import { useParams } from "next/navigation"
+import { java } from "@codemirror/lang-java"
 
 export default function LessonPage() {
     const params = useParams()
@@ -23,6 +25,10 @@ export default function LessonPage() {
     const [isClient, setIsClient] = useState(false)
 
     const { isReady: pythonReady, runPython } = usePython()
+    const { isReady: javaReady, runJava, isLoading: javaLoading } = useJava()
+
+    const isJavaCourse = slug.startsWith("java")
+    const languageReady = isJavaCourse ? javaReady : pythonReady
 
     const [lesson, setLesson] = useState<any>(null)
     const [moduleInfo, setModuleInfo] = useState<any>(null)
@@ -97,7 +103,12 @@ export default function LessonPage() {
         await new Promise(resolve => setTimeout(resolve, 800))
         setOutput({ type: "running", text: "> SYSTEM READY.\n> RUNTIME ONLINE.\n> EXECUTING SOURCE..." })
 
-        const result = await runPython(code)
+        let result;
+        if (isJavaCourse) {
+            result = await runJava(code)
+        } else {
+            result = await runPython(code)
+        }
         const { expectedOutput } = lesson.challenge_data
 
         if (!result || !result.success) {
@@ -201,24 +212,26 @@ export default function LessonPage() {
                                 <div className="h-6 w-[1px] bg-border/20" />
                                 <div className="flex flex-col">
                                     <span className="font-mono text-[8px] uppercase text-muted-foreground/40 leading-none mb-1">Language</span>
-                                    <span className="font-mono text-[10px] font-bold text-info tracking-wide uppercase">Python 3.11</span>
+                                    <span className={`font-mono text-[10px] font-bold ${isJavaCourse ? "text-orange-500" : "text-info"} tracking-wide uppercase`}>
+                                        {isJavaCourse ? "Java 15" : "Python 3.11"}
+                                    </span>
                                 </div>
                             </div>
 
                             <button
                                 onClick={handleRunCode}
-                                disabled={!pythonReady || output?.type === "running"}
+                                disabled={!languageReady || output?.type === "running" || (isJavaCourse && javaLoading)}
                                 className={`flex items-center gap-2 rounded-sm px-6 py-2 text-xs font-black uppercase tracking-widest transition-all ${output?.type === "running"
                                     ? "bg-muted cursor-not-allowed opacity-50"
                                     : "bg-success text-success-foreground hover:scale-[1.02] active:scale-95 shadow-[0_0_20px_rgba(34,197,94,0.2)] hover:shadow-[0_0_30px_rgba(34,197,94,0.4)]"
                                     }`}
                             >
-                                {output?.type === "running" ? (
+                                {output?.type === "running" || (isJavaCourse && javaLoading) ? (
                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                 ) : (
                                     <Play className="h-3.5 w-3.5" fill="currentColor" />
                                 )}
-                                {pythonReady ? (output?.type === "running" ? "Crunching..." : "Initialize") : "Booting..."}
+                                {languageReady ? (output?.type === "running" || (isJavaCourse && javaLoading) ? "Crunching..." : "Initialize") : "Booting..."}
                             </button>
                         </div>
 
@@ -249,7 +262,7 @@ export default function LessonPage() {
                                     value={code}
                                     height="100%"
                                     theme="dark"
-                                    extensions={[python()]}
+                                    extensions={isJavaCourse ? [java()] : [python()]}
                                     onChange={(val) => setCode(val)}
                                     className="h-full text-base [&_.cm-editor]:h-full [&_.cm-scroller]:font-mono [&_.cm-gutters]:bg-black/40 [&_.cm-gutters]:border-r [&_.cm-gutters]:border-border/30 [&_.cm-content]:px-4"
                                     basicSetup={{

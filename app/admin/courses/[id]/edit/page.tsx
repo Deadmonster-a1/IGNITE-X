@@ -1,19 +1,21 @@
 "use client"
 
 import { useState, useEffect, useTransition } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { getCourseContent } from "@/app/actions/courses"
+import { updateCourseDetails, toggleCoursePublish, toggleCoursePremium } from "@/app/actions/admin"
 import { createModule, updateModule, deleteModule, createLesson, updateLesson, deleteLesson, reorderModule, reorderLesson } from "@/app/actions/curriculum"
 import {
     ChevronLeft, Plus, Edit3, Trash2, GripVertical, Settings,
     FileText, Terminal, AlignLeft, Check, AlertCircle, Loader2, Play,
-    ArrowUp, ArrowDown, Eye, Code, Image as ImageIcon, Link as LinkIcon, Bold, Italic, Type, FileCode2,
-    MonitorPlay
+    ArrowUp, ArrowDown, Eye, EyeOff, Code, Image as ImageIcon, Link as LinkIcon, Bold, Italic, Type, FileCode2,
+    MonitorPlay, Save, Globe, Lock
 } from "lucide-react"
 
 export default function EditCourseDashboard() {
     const params = useParams()
     const router = useRouter()
+    const searchParams = useSearchParams()
     const courseId = params.id as string
 
     const [course, setCourse] = useState<any>(null)
@@ -22,6 +24,9 @@ export default function EditCourseDashboard() {
     const [toast, setToast] = useState<{ type: "ok" | "err"; msg: string } | null>(null)
 
     // Editing States
+    const [isEditingCourse, setIsEditingCourse] = useState(false)
+    const [courseEditForm, setCourseEditForm] = useState<any>({})
+
     const [activeLesson, setActiveLesson] = useState<any | null>(null)
     const [lessonEditForm, setLessonEditForm] = useState<any>({})
 
@@ -139,11 +144,50 @@ export default function EditCourseDashboard() {
         startTransition(async () => {
             const data = await getCourseContent(courseId)
             setCourse(data)
+
+            if (searchParams.get("tab") === "settings") {
+                setIsEditingCourse(true)
+                setCourseEditForm({
+                    title: data?.title || "",
+                    description: data?.description || "",
+                    difficulty: data?.difficulty || "Beginner",
+                    duration_hours: data?.duration_hours || 0,
+                    thumbnail_url: data?.thumbnail_url || "",
+                    is_published: data?.is_published || false,
+                    is_premium: data?.is_premium || false,
+                })
+            }
+
             setLoading(false)
         })
     }
 
-    useEffect(() => { loadData() }, [courseId])
+    useEffect(() => { loadData() }, [courseId, searchParams])
+
+    const handleSaveCourseDetails = async () => {
+        startTransition(async () => {
+            const res = await updateCourseDetails(courseId, {
+                title: courseEditForm.title,
+                description: courseEditForm.description,
+                difficulty: courseEditForm.difficulty,
+                duration_hours: parseFloat(courseEditForm.duration_hours) || 0,
+                thumbnail_url: courseEditForm.thumbnail_url,
+            })
+            if (courseEditForm.is_published !== course.is_published) {
+                await toggleCoursePublish(courseId, course.is_published) // old state passed to invert it
+            }
+            if (courseEditForm.is_premium !== course.is_premium) {
+                await toggleCoursePremium(courseId, course.is_premium) // old state passed to invert it
+            }
+
+            if (res.success) {
+                notify("ok", "Course details updated successfully!")
+                loadData()
+            } else {
+                notify("err", res.error || "Failed to save course details")
+            }
+        })
+    }
 
     if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>
 
@@ -176,12 +220,37 @@ export default function EditCourseDashboard() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-3 space-y-4">
+                    {/* Course Details Block */}
+                    <div className="border border-border/50 bg-card rounded-md overflow-hidden">
+                        <div
+                            className={`bg-secondary/30 p-2.5 flex items-center gap-2 border-b border-border/30 group cursor-pointer transition-colors ${isEditingCourse ? 'bg-accent/10 border-accent/30 text-accent' : 'hover:bg-secondary/40 text-foreground'}`}
+                            onClick={() => {
+                                setActiveLesson(null)
+                                setActiveModule(null)
+                                setIsEditingCourse(true)
+                                setCourseEditForm({
+                                    title: course?.title || "",
+                                    description: course?.description || "",
+                                    difficulty: course?.difficulty || "Beginner",
+                                    duration_hours: course?.duration_hours || 0,
+                                    thumbnail_url: course?.thumbnail_url || "",
+                                    is_published: course?.is_published || false,
+                                    is_premium: course?.is_premium || false,
+                                })
+                            }}
+                        >
+                            <Settings className="h-4 w-4 shrink-0" />
+                            <span className="text-[11px] font-bold uppercase tracking-widest font-mono">Course Details</span>
+                        </div>
+                    </div>
+
                     {course.modules?.map((m: any, mIdx: number) => (
                         <div key={m.id} className="border border-border/50 bg-card rounded-md overflow-hidden">
                             <div
                                 className={`bg-secondary/30 p-2.5 flex items-center justify-between border-b border-border/30 group cursor-pointer transition-colors ${activeModule?.id === m.id ? 'bg-accent/10 border-accent/30' : 'hover:bg-secondary/40'}`}
                                 onClick={() => {
                                     setActiveLesson(null)
+                                    setIsEditingCourse(false)
                                     setActiveModule(m)
                                     setModuleEditForm({ title: m.title || "" })
                                 }}
@@ -210,6 +279,7 @@ export default function EditCourseDashboard() {
                                     <button
                                         key={l.id}
                                         onClick={() => {
+                                            setIsEditingCourse(false)
                                             setActiveModule(null)
                                             setActiveLesson(l)
                                             setLessonEditForm({
@@ -244,11 +314,125 @@ export default function EditCourseDashboard() {
 
             {/* Main Editor Space */}
             <div className="flex-1 overflow-y-auto bg-background p-8">
-                {(!activeLesson && !activeModule) ? (
+                {(!activeLesson && !activeModule && !isEditingCourse) ? (
                     <div className="h-full flex flex-col items-center justify-center text-muted-foreground/50 max-w-sm mx-auto text-center">
                         <Settings className="h-12 w-12 mb-4" />
                         <h3 className="text-lg font-bold text-foreground mb-2">Select an Item</h3>
-                        <p className="text-sm">Click on a module or lesson from the sidebar to edit its text contents and configurations.</p>
+                        <p className="text-sm">Click on Course Details, a Module, or a Lesson from the sidebar to edit its content.</p>
+                    </div>
+                ) : isEditingCourse ? (
+                    <div className="max-w-4xl mx-auto space-y-8 pb-24">
+                        <div className="flex items-center justify-between border-b border-border/50 pb-6">
+                            <div>
+                                <span className="text-[10px] font-mono text-accent uppercase tracking-widest bg-accent/10 px-2 py-1 rounded-sm border border-accent/20">
+                                    Global Settings
+                                </span>
+                                <h1 className="text-3xl font-black mt-4 text-foreground">Course Details</h1>
+                            </div>
+                            <button
+                                onClick={handleSaveCourseDetails}
+                                disabled={isPending}
+                                className="px-6 py-2.5 bg-accent hover:bg-accent/90 text-white text-xs font-mono font-bold uppercase tracking-widest rounded-sm transition-colors flex items-center gap-2"
+                            >
+                                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                                Save Course
+                            </button>
+                        </div>
+
+                        <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Title</label>
+                                    <input
+                                        type="text"
+                                        value={courseEditForm.title}
+                                        onChange={(e) => setCourseEditForm({ ...courseEditForm, title: e.target.value })}
+                                        className="w-full bg-[#0a0a0a] border border-border/50 rounded-sm p-4 text-sm font-medium focus:border-accent outline-none text-foreground"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Description</label>
+                                    <textarea
+                                        value={courseEditForm.description}
+                                        onChange={(e) => setCourseEditForm({ ...courseEditForm, description: e.target.value })}
+                                        rows={5}
+                                        className="w-full bg-[#0a0a0a] border border-border/50 rounded-sm p-4 text-sm font-medium focus:border-accent outline-none text-foreground resize-none"
+                                    />
+                                </div>
+
+                                <div className="grid sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Difficulty</label>
+                                        <select
+                                            value={courseEditForm.difficulty}
+                                            onChange={(e) => setCourseEditForm({ ...courseEditForm, difficulty: e.target.value })}
+                                            className="w-full bg-[#0a0a0a] border border-border/50 rounded-sm p-4 text-sm font-medium focus:border-accent outline-none text-foreground"
+                                        >
+                                            <option>Beginner</option>
+                                            <option>Intermediate</option>
+                                            <option>Advanced</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Duration (Hours)</label>
+                                        <input
+                                            type="number"
+                                            value={courseEditForm.duration_hours}
+                                            onChange={(e) => setCourseEditForm({ ...courseEditForm, duration_hours: e.target.value })}
+                                            className="w-full bg-[#0a0a0a] border border-border/50 rounded-sm p-4 text-sm font-medium focus:border-accent outline-none text-foreground"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-6">
+                                <div className="bg-[#050505] border border-border/50 rounded-md p-5 space-y-4">
+                                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-muted-foreground">Access & Visibility</h3>
+                                    
+                                    <button 
+                                        onClick={() => setCourseEditForm((prev: any) => ({ ...prev, is_published: !prev.is_published }))}
+                                        className={`w-full flex items-center justify-between p-3 border rounded-sm transition-all ${courseEditForm.is_published ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400'}`}>
+                                        <div className="flex items-center gap-2">
+                                            {courseEditForm.is_published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                                            <span className="font-mono text-xs uppercase tracking-wider font-bold">
+                                                {courseEditForm.is_published ? "Published" : "Draft"}
+                                            </span>
+                                        </div>
+                                    </button>
+
+                                    <button 
+                                        onClick={() => setCourseEditForm((prev: any) => ({ ...prev, is_premium: !prev.is_premium }))}
+                                        className={`w-full flex items-center justify-between p-3 border rounded-sm transition-all ${courseEditForm.is_premium ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-[#0a0a0a] border-border/50 text-foreground'}`}>
+                                        <div className="flex items-center gap-2">
+                                            {courseEditForm.is_premium ? <Lock className="h-4 w-4" /> : <Globe className="h-4 w-4" />}
+                                            <span className="font-mono text-xs uppercase tracking-wider font-bold">
+                                                {courseEditForm.is_premium ? "Premium Only" : "Free Access"}
+                                            </span>
+                                        </div>
+                                    </button>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Course Thumbnail</label>
+                                    <div className="aspect-video bg-[#050505] border border-border/50 rounded-md overflow-hidden relative group">
+                                        {courseEditForm.thumbnail_url ? (
+                                            <img src={courseEditForm.thumbnail_url} alt="Course Cover" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                                                <ImageIcon className="h-8 w-8" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="https://..."
+                                        value={courseEditForm.thumbnail_url}
+                                        onChange={(e) => setCourseEditForm({ ...courseEditForm, thumbnail_url: e.target.value })}
+                                        className="w-full bg-[#0a0a0a] border border-border/50 rounded-sm p-3 text-xs font-mono focus:border-accent outline-none text-foreground mt-2"
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 ) : activeModule ? (
                     <div className="max-w-4xl mx-auto space-y-8 pb-24">
@@ -429,6 +613,25 @@ export default function EditCourseDashboard() {
                                             placeholder="e.g. HELLO_WORLD"
                                         />
                                         <p className="text-[10px] text-muted-foreground/50">Used by the backend execution engine to grant XP.</p>
+                                    </div>
+                                    <div className="space-y-2 col-span-2 mt-4">
+                                        <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Raw Challenge Data JSON Override</label>
+                                        <textarea
+                                            value={lessonEditForm.challenge_data ? JSON.stringify(lessonEditForm.challenge_data, null, 2) : ""}
+                                            onChange={(e) => {
+                                                try {
+                                                    const parsed = JSON.parse(e.target.value);
+                                                    setLessonEditForm({
+                                                        ...lessonEditForm,
+                                                        challenge_data: parsed
+                                                    });
+                                                } catch (err) {
+                                                    // ignore parse errors while typing
+                                                }
+                                            }}
+                                            className="w-full bg-[#000] border border-border/50 rounded-sm p-4 text-xs font-mono focus:border-accent outline-none min-h-[250px] text-[#A855F7]/80"
+                                            placeholder="Paste valid JSON object here..."
+                                        />
                                     </div>
                                 </div>
                             </div>

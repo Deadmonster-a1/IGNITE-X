@@ -15,9 +15,9 @@ import {
 const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced"]
 
 type CourseValues = { title: string; description: string; difficulty: string; duration_hours: string; thumbnail_url: string }
-type NewCourseValues = { title: string; slug: string; description: string; difficulty: string; duration_hours: string; is_premium: boolean }
+type NewCourseValues = { title: string; slug: string; description: string; difficulty: string; duration_hours: string; is_premium: boolean; template: string }
 const EMPTY: CourseValues = { title: "", description: "", difficulty: "Beginner", duration_hours: "", thumbnail_url: "" }
-const EMPTY_NEW: NewCourseValues = { title: "", slug: "", description: "", difficulty: "Beginner", duration_hours: "", is_premium: false }
+const EMPTY_NEW: NewCourseValues = { title: "", slug: "", description: "", difficulty: "Beginner", duration_hours: "", is_premium: false, template: "blank" }
 
 export default function AdminCoursesPage() {
     const [courses, setCourses] = useState<any[]>([])
@@ -45,33 +45,10 @@ export default function AdminCoursesPage() {
     useEffect(() => { load() }, [])
 
     const openEdit = (course: any) => {
-        setEditModal(course)
-        setEditVal({
-            title: course.title || "",
-            description: course.description || "",
-            difficulty: course.difficulty || "Beginner",
-            duration_hours: String(course.duration_hours || ""),
-            thumbnail_url: course.thumbnail_url || "",
-        })
+        // Now redirects to the dedicated Course Builder page
     }
 
-    const handleSave = async () => {
-        if (!editModal) return
-        startTransition(async () => {
-            const res = await updateCourseDetails(editModal.id, {
-                title: editVal.title,
-                description: editVal.description,
-                difficulty: editVal.difficulty,
-                duration_hours: parseFloat(editVal.duration_hours) || 0,
-                thumbnail_url: editVal.thumbnail_url,
-            })
-            if (res.success) {
-                setCourses(prev => prev.map(c => c.id === editModal.id ? { ...c, ...editVal, duration_hours: parseFloat(editVal.duration_hours) } : c))
-                notify("ok", "Course updated and live on the site")
-                setEditModal(null)
-            } else notify("err", res.error || "Failed to save")
-        })
-    }
+    // Removed handleSave for old modal
 
     const handleTogglePublish = async (courseId: string, isPublished: boolean) => {
         startTransition(async () => {
@@ -117,6 +94,7 @@ export default function AdminCoursesPage() {
                 difficulty: newVal.difficulty,
                 duration_hours: parseFloat(newVal.duration_hours) || 0,
                 is_premium: newVal.is_premium,
+                template: newVal.template,
             })
             if (res.success) {
                 notify("ok", "Course created! Refresh to see it.")
@@ -144,62 +122,7 @@ export default function AdminCoursesPage() {
                 </div>
             )}
 
-            {/* Edit Modal */}
-            {editModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050505]/90 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-lg bg-[#0a0a0a] border border-[#f26722]/30 overflow-hidden">
-                        <div className="h-0.5 bg-gradient-to-r from-[#f26722]/0 via-[#f26722] to-[#f26722]/0" />
-                        <div className="p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-sm font-mono uppercase tracking-widest text-[#f26722]">Edit Course</h2>
-                                <button onClick={() => setEditModal(null)} className="text-[#444] hover:text-[#EDEDED]"><X className="h-4 w-4" /></button>
-                            </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="text-[10px] font-mono uppercase tracking-widest text-[#444] block mb-1.5">Title</label>
-                                    <input value={editVal.title} onChange={e => setEditVal(v => ({ ...v, title: e.target.value }))}
-                                        className="w-full bg-[#050505] border border-[#1a1a1a] text-[#EDEDED] px-3 py-2.5 text-sm focus:outline-none focus:border-[#f26722]/50 font-mono" />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-mono uppercase tracking-widest text-[#444] block mb-1.5">Description</label>
-                                    <textarea value={editVal.description} onChange={e => setEditVal(v => ({ ...v, description: e.target.value }))}
-                                        rows={3} className="w-full bg-[#050505] border border-[#1a1a1a] text-[#EDEDED] px-3 py-2.5 text-sm focus:outline-none focus:border-[#f26722]/50 font-mono resize-none" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-[10px] font-mono uppercase tracking-widest text-[#444] block mb-1.5">Difficulty</label>
-                                        <select value={editVal.difficulty} onChange={e => setEditVal(v => ({ ...v, difficulty: e.target.value }))}
-                                            className="w-full bg-[#050505] border border-[#1a1a1a] text-[#EDEDED] px-3 py-2.5 text-sm focus:outline-none focus:border-[#f26722]/50 font-mono">
-                                            {DIFFICULTIES.map(d => <option key={d}>{d}</option>)}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] font-mono uppercase tracking-widest text-[#444] block mb-1.5">Duration (hrs)</label>
-                                        <input type="number" value={editVal.duration_hours} onChange={e => setEditVal(v => ({ ...v, duration_hours: e.target.value }))}
-                                            className="w-full bg-[#050505] border border-[#1a1a1a] text-[#EDEDED] px-3 py-2.5 text-sm focus:outline-none focus:border-[#f26722]/50 font-mono" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-mono uppercase tracking-widest text-[#444] block mb-1.5">Thumbnail URL</label>
-                                    <input value={editVal.thumbnail_url} onChange={e => setEditVal(v => ({ ...v, thumbnail_url: e.target.value }))}
-                                        placeholder="https://..." className="w-full bg-[#050505] border border-[#1a1a1a] text-[#EDEDED] px-3 py-2.5 text-sm focus:outline-none focus:border-[#f26722]/50 font-mono" />
-                                </div>
-                            </div>
-                            <div className="flex gap-3 mt-6 pt-4 border-t border-[#1a1a1a]">
-                                <button onClick={() => setEditModal(null)}
-                                    className="flex-1 py-2.5 border border-[#1a1a1a] text-[#555] text-xs font-mono uppercase tracking-wider hover:text-[#EDEDED] transition-all">
-                                    Cancel
-                                </button>
-                                <button onClick={handleSave} disabled={isPending}
-                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#f26722] text-[#050505] text-xs font-mono font-bold uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-60">
-                                    {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                                    Save & Publish
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Removed Edit Modal - using full page builder instead */}
 
             {/* Header */}
             <div className="flex items-start justify-between">
@@ -245,12 +168,24 @@ export default function AdminCoursesPage() {
                                     className="w-full bg-[#050505] border border-[#1a1a1a] text-[#EDEDED] px-3 py-2.5 text-sm focus:outline-none focus:border-[#f26722]/50 font-mono" />
                             </div>
                         </div>
-                        <div>
-                            <label className="text-[10px] font-mono uppercase tracking-widest text-[#444] block mb-1.5">Description</label>
-                            <textarea value={newVal.description}
-                                onChange={e => setNewVal(v => ({ ...v, description: e.target.value }))}
-                                rows={2} placeholder="Brief course description..."
-                                className="w-full bg-[#050505] border border-[#1a1a1a] text-[#EDEDED] px-3 py-2.5 text-sm focus:outline-none focus:border-[#f26722]/50 font-mono resize-none" />
+                        <div className="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-[10px] font-mono uppercase tracking-widest text-[#444] block mb-1.5">Description</label>
+                                <textarea value={newVal.description}
+                                    onChange={e => setNewVal(v => ({ ...v, description: e.target.value }))}
+                                    rows={2} placeholder="Brief course description..."
+                                    className="w-full bg-[#050505] border border-[#1a1a1a] text-[#EDEDED] px-3 py-2.5 text-sm focus:outline-none focus:border-[#f26722]/50 font-mono resize-none" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-mono uppercase tracking-widest text-[#444] block mb-1.5">Starting Template</label>
+                                <select value={newVal.template}
+                                    onChange={e => setNewVal(v => ({ ...v, template: e.target.value }))}
+                                    className="w-full bg-[#050505] border border-[#1a1a1a] text-[#f26722] px-3 py-2.5 text-sm focus:outline-none focus:border-[#f26722]/50 font-mono font-bold">
+                                    <option value="blank">Blank Course</option>
+                                    <option value="crash_course">Crash Course (1 Module, 3 Lessons)</option>
+                                    <option value="masterclass">Masterclass (4 Modules, 12 Lessons)</option>
+                                </select>
+                            </div>
                         </div>
                         <div className="grid sm:grid-cols-3 gap-4">
                             <div>
@@ -349,13 +284,13 @@ export default function AdminCoursesPage() {
                                 </button>
 
                                 {/* Edit Settings */}
-                                <button onClick={() => openEdit(course)}
+                                <Link href={`/admin/courses/${course.id}/edit?tab=settings`}
                                     className="ml-auto flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-mono font-bold border border-[#f26722]/20 text-[#f26722]/70 hover:text-[#f26722] hover:border-[#f26722]/40 hover:bg-[#f26722]/5 transition-all">
                                     <Edit3 className="h-3 w-3" /> Settings
-                                </button>
+                                </Link>
 
                                 {/* Edit Syllabus */}
-                                <Link href={`/admin/courses/${course.id}/edit`}
+                                <Link href={`/admin/courses/${course.id}/edit?tab=syllabus`}
                                     className="flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-mono font-bold border border-[#a855f7]/20 text-[#a855f7]/70 hover:text-[#a855f7] hover:border-[#a855f7]/40 hover:bg-[#a855f7]/5 transition-all">
                                     <BookOpen className="h-3 w-3" /> Syllabus
                                 </Link>

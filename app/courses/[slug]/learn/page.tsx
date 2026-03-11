@@ -35,7 +35,7 @@ export default function LearnDashboard({ params }: { params: Promise<{ slug: str
                     <div className="p-5 border border-border/30 bg-[#090c10] rounded-lg">
                         <Terminal className="h-6 w-6 text-accent mb-3" />
                         <h3 className="font-bold text-foreground mb-1">Interactive Console</h3>
-                        <p className="text-xs text-muted-foreground">Execute Python code directly in your browser using our WebAssembly runtime.</p>
+                        <p className="text-xs text-muted-foreground">Execute {slug === "java" ? "Java" : "Python"} code directly in your browser.</p>
                     </div>
                     <div className="p-5 border border-border/30 bg-[#090c10] rounded-lg">
                         <ShieldCheck className="h-6 w-6 text-success mb-3" />

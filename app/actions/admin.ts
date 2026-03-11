@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server"
 import { revalidatePath } from "next/cache"
+import { createModule, createLesson } from "./curriculum"
 
 // ─── Users ───────────────────────────────────────────────────
 export async function getAllUsers() {
@@ -126,24 +127,61 @@ export async function updateCourseDetails(courseId: string, values: {
 }
 
 export async function createCourse(values: {
-    title: string; description: string; slug: string; difficulty: string; duration_hours: number; is_premium: boolean
+    title: string; description: string; slug: string; difficulty: string; duration_hours: number; is_premium: boolean; template?: string
 }) {
     const supabase = await createClient()
     // Try with all fields first; fall back to just base fields if migration hasn't run
-    const fullInsert = await supabase.from("courses").insert({ ...values, is_published: false })
-    if (!fullInsert.error) {
+    const fullInsert = await supabase.from("courses").insert({
+        title: values.title,
+        description: values.description,
+        slug: values.slug,
+        difficulty: values.difficulty,
+        duration_hours: values.duration_hours,
+        is_premium: values.is_premium,
+        is_published: false
+    }).select("id").single()
+
+    if (fullInsert.error) {
+        // Fallback: insert only base columns (without slug/difficulty/duration_hours)
+        const { error } = await supabase.from("courses").insert({
+            title: values.title,
+            description: values.description,
+            is_premium: values.is_premium,
+            is_published: false,
+        })
+        if (error) return { success: false, error: `Migration required: Run add_course_columns.sql in Supabase, then retry. (${error.message})` }
         revalidatePath("/admin/courses")
         revalidatePath("/courses")
         return { success: true }
     }
-    // Fallback: insert only base columns (without slug/difficulty/duration_hours)
-    const { error } = await supabase.from("courses").insert({
-        title: values.title,
-        description: values.description,
-        is_premium: values.is_premium,
-        is_published: false,
-    })
-    if (error) return { success: false, error: `Migration required: Run add_course_columns.sql in Supabase, then retry. (${error.message})` }
+
+    const courseId = fullInsert.data.id
+
+    // Apply Templates
+    if (values.template === "crash_course") {
+        const modRes = await createModule(courseId, "Complete Course", 1)
+        if (modRes.success && modRes.moduleId) {
+            await createLesson(modRes.moduleId, { title: "Introduction", sequence_order: 1, content_type: "text" })
+            await createLesson(modRes.moduleId, { title: "Core Concepts", sequence_order: 2, content_type: "text" })
+            await createLesson(modRes.moduleId, { title: "Final Exam", sequence_order: 3, content_type: "text" })
+        }
+    } else if (values.template === "masterclass") {
+        const modules = [
+            { title: "Beginner Basics", lessons: ["Welcome & Setup", "Syntax Crash Course", "Writing Your First Script"] },
+            { title: "Intermediate Deep Dive", lessons: ["Data Structures", "Functions & Scope", "Error Handling"] },
+            { title: "Advanced Patterns", lessons: ["Object Oriented Programming", "Async & Concurrency", "Design Patterns"] },
+            { title: "Capstone Project", lessons: ["Project Overview", "Building the Core", "Deployment & Wrap Up"] },
+        ]
+        for (let i = 0; i < modules.length; i++) {
+            const modRes = await createModule(courseId, modules[i].title, i + 1)
+            if (modRes.success && modRes.moduleId) {
+                for (let j = 0; j < modules[i].lessons.length; j++) {
+                    await createLesson(modRes.moduleId, { title: modules[i].lessons[j], sequence_order: j + 1, content_type: "text" })
+                }
+            }
+        }
+    }
+
     revalidatePath("/admin/courses")
     revalidatePath("/courses")
     return { success: true }

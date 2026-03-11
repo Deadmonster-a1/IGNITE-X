@@ -31,11 +31,11 @@ export async function getCourseContent(courseId: string) {
     const { data: course, error } = await supabase
         .from('courses')
         .select(`
-            id, title, description, thumbnail, is_premium, premium_tier,
+            id, title, description, thumbnail_url, difficulty, duration_hours, is_published, is_premium, premium_tier,
             modules (
                 id, title, sequence_order,
                 lessons (
-                    id, title, sequence_order, content_type, xp_reward
+                    id, title, sequence_order, content_type, xp_reward, content, challenge_data, description
                 )
             )
         `)
@@ -117,6 +117,14 @@ export async function getLessonContent(lessonId: string) {
     if (error || !lesson) {
         console.error("Error fetching lesson content:", error, lessonId)
         return null
+    }
+
+    if (lesson.challenge_data && typeof lesson.challenge_data === "string") {
+        try {
+            lesson.challenge_data = JSON.parse(lesson.challenge_data);
+        } catch (e) {
+            console.error("Failed to parse challenge_data:", e);
+        }
     }
 
     return lesson
