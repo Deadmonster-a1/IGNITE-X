@@ -1,0 +1,6 @@
+﻿app/courses/python/learn/layout.tsx(5,34): error TS2307: Cannot find module '@/lib/python-course-data' or its corresponding type declarations.
+app/courses/python/learn/layout.tsx(21,51): error TS7006: Parameter 'm' implicitly has an 'any' type.
+app/courses/python/learn/layout.tsx(72,48): error TS7006: Parameter 'module' implicitly has an 'any' type.
+app/courses/python/learn/layout.tsx(106,70): error TS7006: Parameter 'lesson' implicitly has an 'any' type.
+components/courses.tsx(239,10): error TS2305: Module '"@/app/actions/courses"' has no exported member 'updateCourse'.
+seed_courses.ts(4,34): error TS2307: Cannot find module './lib/python-course-data' or its corresponding type declarations.

@@ -1,0 +1,351 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f5f5f5;
+  --muted-foreground: #71717a;
+  --accent: #f26722;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #f26722;
+  --surface: #fafafa;
+  --surface-2: #f0f0f0;
+  --success: #22c55e;
+  --info: #3b82f6;
+  --radius: 0.375rem;
+}
+
+.dark,
+[data-theme="dark"] {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #111113;
+  --card-foreground: #fafafa;
+  --popover: #111113;
+  --popover-foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #09090b;
+  --secondary: #18181b;
+  --secondary-foreground: #fafafa;
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+  --accent: #f26722;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #f26722;
+  --surface: #111113;
+  --surface-2: #1c1c1f;
+  --success: #22c55e;
+  --info: #3b82f6;
+}
+
+@theme inline {
+  --font-sans: 'Inter', 'Inter Fallback', sans-serif;
+  --font-mono: 'JetBrains Mono', 'JetBrains Mono Fallback', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-success: var(--success);
+  --color-info: var(--info);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* --- Entrance animations (CSS-only, no GSAP dependency) --- */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- Looping animations --- */
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(242, 103, 34, 0.12); }
+  50% { box-shadow: 0 0 32px rgba(242, 103, 34, 0.3); }
+}
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink-caret {
+  0%, 100% { border-color: var(--accent); }
+  50% { border-color: transparent; }
+}
+
+.animate-typing {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--accent);
+  animation: typing 3s steps(40) 1s forwards, blink-caret 0.75s step-end infinite;
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-count-up {
+  animation: count-up 0.6s ease-out forwards;
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  50% { transform: scale(1.05); opacity: 0; }
+  100% { transform: scale(0.9); opacity: 0; }
+}
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+/* --- Patterns --- */
+
+.bg-dots {
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.bg-grid-fine {
+  background-image:
+    linear-gradient(rgba(242, 103, 34, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(242, 103, 34, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* --- Cyberpunk Utilities --- */
+
+/* Scan line that sweeps top-to-bottom */
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.scan-line::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.25;
+  animation: scan 8s linear infinite;
+  pointer-events: none;
+}
+
+/* Clip-path for chamfered corners */
+.clip-chamfer {
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 85% 100%, 0 100%);
+}
+
+/* Screw decoration corner dots */
+.cyber-corner::before,
+.cyber-corner::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  border: 1px solid var(--accent);
+  background: var(--background);
+  opacity: 0.5;
+}
+.cyber-corner::before { top: 6px; left: 6px; }
+.cyber-corner::after { bottom: 6px; right: 6px; }
+
+/* HUD-style grid overlay */
+.bg-grid-cyber {
+  background-image:
+    linear-gradient(rgba(242, 103, 34, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(242, 103, 34, 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Glitch text micro-animation */
+@keyframes glitch {
+  0%, 100% { text-shadow: none; }
+  10% { text-shadow: -1px 0 rgba(242,103,34,0.4), 1px 0 rgba(59,130,246,0.4); }
+  20% { text-shadow: 1px 0 rgba(242,103,34,0.4), -1px 0 rgba(59,130,246,0.4); }
+  30%, 100% { text-shadow: none; }
+}
+
+.cyber-glitch {
+  animation: glitch 4s ease-in-out infinite;
+}
+
+/* Accent underline that slides in */
+.cyber-underline {
+  position: relative;
+}
+.cyber-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+.cyber-underline:hover::after {
+  width: 100%;
+}
+
+/* Data stream border animation */
+@keyframes border-flow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+
+.cyber-border {
+  border-image: linear-gradient(90deg, var(--border), var(--accent), var(--border)) 1;
+  animation: border-flow 4s linear infinite;
+}
+
+/* Robot HUD pulse for mobile */
+@keyframes hud-pulse {
+  0%, 100% { border-color: rgba(242, 103, 34, 0.3); }
+  50% { border-color: rgba(242, 103, 34, 0.6); }
+}
+
+.hud-corner-pulse {
+  animation: hud-pulse 3s ease-in-out infinite;
+}
+
+/* ── Section Bot animations ── */
+@keyframes bot-blink-kf {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@keyframes bot-antenna-kf {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes bot-antenna-ring-kf {
+  0% { r: 4; opacity: 0.3; }
+  100% { r: 10; opacity: 0; }
+}
+
+.bot-blink {
+  animation: bot-blink-kf 4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.bot-antenna {
+  animation: bot-antenna-kf 2.5s ease-in-out infinite;
+}
+
+.bot-antenna-ring {
+  animation: bot-antenna-ring-kf 1.5s ease-out infinite;
+}
+
+/* ── Robot Dock ── */
+.robot-dock {
+  position: relative;
+}
+
+/* Smooth scroll + canvas */
+html { scroll-behavior: smooth; }
+.canvas-container canvas { outline: none !important; }
