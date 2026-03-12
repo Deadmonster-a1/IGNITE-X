@@ -58,6 +58,7 @@ export function FAQ() {
                             >
                                 <button
                                     onClick={() => setOpenIndex(isOpen ? null : index)}
+                                    suppressHydrationWarning
                                     className="flex w-full items-center justify-between px-6 py-5 text-left"
                                 >
                                     <span className="font-bold text-foreground pr-8">{faq.question}</span>

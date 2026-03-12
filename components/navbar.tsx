@@ -207,6 +207,7 @@ export function Navbar() {
               </Link>
               <Link
                 href="/profile"
+                suppressHydrationWarning
                 className="flex items-center gap-2 border border-accent/50 bg-accent/10 px-5 py-2 text-sm font-semibold text-accent transition-all hover:bg-accent/20"
                 style={{ clipPath: "polygon(0 0, 100% 0, 100% 70%, 88% 100%, 0 100%)" }}
               >
@@ -217,6 +218,7 @@ export function Navbar() {
           ) : (
             <Link
               href="/login"
+              suppressHydrationWarning
               className="hidden items-center gap-2 border border-accent/50 bg-accent/10 px-5 py-2 text-sm font-semibold text-accent transition-all hover:bg-accent/20 md:flex"
               style={{ clipPath: "polygon(0 0, 100% 0, 100% 70%, 88% 100%, 0 100%)" }}
             >
@@ -227,6 +229,7 @@ export function Navbar() {
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
+            suppressHydrationWarning
             className="flex h-9 w-9 items-center justify-center border border-border text-muted-foreground lg:hidden"
             aria-label="Toggle menu"
           >

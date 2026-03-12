@@ -135,10 +135,12 @@ export function Footer({ showCTA = false }: { showCTA?: boolean }) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="developer@email.com"
                 required
+                suppressHydrationWarning
                 className="flex-1 border border-border bg-card px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
               />
               <button
                 type="submit"
+                suppressHydrationWarning
                 className="group flex items-center justify-center gap-2 bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-lg shadow-accent/20 transition-all hover:shadow-accent/40 hover:brightness-110"
                 style={{ clipPath: "polygon(0 0, 100% 0, 100% 70%, 88% 100%, 0 100%)" }}
               >

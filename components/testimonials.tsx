@@ -173,6 +173,7 @@ export function Testimonials() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleWriteReviewClick}
+                suppressHydrationWarning
                 className="hidden sm:flex items-center gap-2 border border-accent/50 bg-accent/10 hover:bg-accent/20 text-accent px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors backdrop-blur-sm"
               >
                 <Plus className="h-4 w-4" />
@@ -181,6 +182,7 @@ export function Testimonials() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={prev}
+                  suppressHydrationWarning
                   className="flex h-10 w-10 items-center justify-center border border-border text-muted-foreground transition-colors hover:border-accent/30 hover:bg-secondary hover:text-foreground"
                   aria-label="Previous testimonial"
                 >
@@ -188,6 +190,7 @@ export function Testimonials() {
                 </button>
                 <button
                   onClick={next}
+                  suppressHydrationWarning
                   className="flex h-10 w-10 items-center justify-center border border-border text-muted-foreground transition-colors hover:border-accent/30 hover:bg-secondary hover:text-foreground"
                   aria-label="Next testimonial"
                 >

@@ -99,6 +99,7 @@ export function Hero() {
             <div className="mt-10 flex flex-wrap items-center gap-4 animate-[fadeInUp_0.6s_ease-out_0.5s_both]">
               <Link
                 href={user ? "/dashboard" : "/signup"}
+                suppressHydrationWarning
                 className="pointer-events-auto z-50 group relative flex items-center gap-3 bg-accent px-8 py-4 text-sm font-black uppercase tracking-widest text-[#050505] transition-all hover:scale-[1.02]"
                 style={{ clipPath: "polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%)" }}
               >
@@ -107,6 +108,7 @@ export function Hero() {
               </Link>
               <Link
                 href="/programs"
+                suppressHydrationWarning
                 className="pointer-events-auto z-50 group flex items-center gap-3 border border-border bg-background/50 px-8 py-4 text-sm font-bold uppercase tracking-widest text-foreground backdrop-blur-sm transition-all hover:border-accent/50 hover:bg-accent/10"
               >
                 <Play className="h-4 w-4 text-accent" />

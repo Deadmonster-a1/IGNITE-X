@@ -132,6 +132,7 @@ export function Pricing() {
 
                                 {/* CTA */}
                                 <button
+                                    suppressHydrationWarning
                                     className={`mt-8 w-full py-3 text-sm font-black uppercase tracking-widest transition-all ${plan.highlight
                                             ? "bg-accent text-[#050505] hover:bg-accent/90"
                                             : "border border-border bg-secondary text-foreground hover:border-accent/40 hover:text-accent"

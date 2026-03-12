@@ -218,6 +218,7 @@ export function LearningPaths() {
                 <button
                   key={key}
                   onClick={() => handleTabChange(key)}
+                  suppressHydrationWarning
                   className={`relative px-6 py-2.5 text-sm font-bold uppercase tracking-widest transition-all duration-300 ${isActive
                       ? "text-accent-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-white/5"
@@ -290,6 +291,7 @@ export function LearningPaths() {
           <div className="mt-16 flex justify-center">
             <a
               href="/programs"
+              suppressHydrationWarning
               className="group flex items-center gap-3 bg-accent px-8 py-4 text-sm font-black uppercase tracking-widest text-accent-foreground shadow-[0_0_20px_rgba(242,103,34,0.2)] transition-all hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(242,103,34,0.4)]"
               style={{ clipPath: "polygon(0 0, 100% 0, 100% 70%, 92% 100%, 0 100%)" }}
             >
