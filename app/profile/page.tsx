@@ -25,10 +25,11 @@ const itemVariants = {
     visible: { opacity: 1, y: 0, filter: "brightness(1) blur(0px)", transition: { duration: 0.4 } }
 }
 
-type SettingsTab = "identity" | "appearance" | "notifications" | "security" | "billing"
+type SettingsTab = "identity" | "appearance" | "portfolio" | "notifications" | "security" | "billing"
 
 const tabs: { id: SettingsTab; label: string; icon: any }[] = [
     { id: "identity", label: "Identity", icon: User },
+    { id: "portfolio", label: "Public Portfolio", icon: Globe },
     { id: "appearance", label: "Appearance", icon: Palette },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "security", label: "Security", icon: Shield },
@@ -52,6 +53,8 @@ export default function ProfilePage() {
 
     const [alias, setAlias] = useState("")
     const [bio, setBio] = useState("")
+    const [username, setUsername] = useState("")
+    const [isPublic, setIsPublic] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [saveMessage, setSaveMessage] = useState("")
 
@@ -86,6 +89,8 @@ export default function ProfilePage() {
                 setProfile(profileData)
                 setAlias(profileData.name || user.user_metadata?.full_name || "")
                 setBio(profileData.bio || "")
+                setUsername(profileData.username || "")
+                setIsPublic(!!profileData.is_public)
             }
             setIsLoading(false)
         }
@@ -109,6 +114,8 @@ export default function ProfilePage() {
         const { error } = await supabase.from("profiles").update({
             name: alias,
             bio,
+            username,
+            is_public: isPublic,
             updated_at: new Date().toISOString(),
         }).eq("id", user?.id ?? "")
         setIsSaving(false)
@@ -291,6 +298,72 @@ export default function ProfilePage() {
                     {/* Main Content */}
                     <div className="md:col-span-3">
                         <AnimatePresence mode="wait">
+                             {/* ─── PORTFOLIO ─── */}
+                             {activeTab === "portfolio" && (
+                                 <motion.div key="portfolio" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }} className="space-y-6">
+                                     <form onSubmit={handleSave} className="border border-[#1a1a1a] bg-[#0a0a0a] p-6 sm:p-8 space-y-6 relative overflow-hidden">
+                                         <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2" style={{ borderColor: `${accent}1A` }} />
+                                         
+                                         <h2 className="text-sm font-mono uppercase tracking-widest flex items-center gap-3 mb-6" style={{ color: accent }}>
+                                             <Globe className="w-4 h-4" />
+                                             Public Portfolio Settings
+                                             <div className="h-px flex-1 ml-4" style={{ background: `linear-gradient(to right, ${accent}4D, transparent)` }} />
+                                         </h2>
+
+                                         <div className="space-y-5">
+                                             <div className="flex items-center justify-between p-4 border border-[#1a1a1a] bg-[#050505]/50">
+                                                 <div>
+                                                     <div className="text-sm font-medium">Public Visibility</div>
+                                                     <div className="text-[10px] font-mono text-[#a1a1aa]">Allow others to view your profile using your unique link</div>
+                                                 </div>
+                                                 <button type="button" onClick={() => setIsPublic(!isPublic)}
+                                                     className="relative w-12 h-6 transition-colors"
+                                                     style={{ backgroundColor: isPublic ? `${accent}4D` : '#1a1a1a' }}>
+                                                     <div className="absolute top-0.5 left-0.5 w-5 h-5 transition-transform"
+                                                         style={{ transform: isPublic ? 'translateX(1.5rem)' : 'translateX(0)', backgroundColor: isPublic ? accent : '#a1a1aa' }} />
+                                                 </button>
+                                             </div>
+
+                                             <div className="space-y-1.5">
+                                                 <label className="text-[10px] font-mono uppercase tracking-wider text-[#a1a1aa]">Unique Username / Portfolio Handle</label>
+                                                 <div className="relative">
+                                                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-[#444]">@</div>
+                                                     <input type="text" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                                                         className="w-full bg-[#050505] border border-[#1a1a1a] text-sm pl-8 pr-4 py-2.5 focus:outline-none transition-all font-mono"
+                                                         style={{ color: accent }}
+                                                         onFocus={e => { e.target.style.borderColor = accent }}
+                                                         onBlur={e => { e.target.style.borderColor = '#1a1a1a' }}
+                                                         placeholder="yourname" />
+                                                 </div>
+                                                 <p className="text-[10px] text-[#a1a1aa]/60 mt-1">This will be your link: {window?.location?.origin}/portfolio/{username || 'yourname'}</p>
+                                             </div>
+
+                                             {isPublic && (
+                                                 <div className="p-4 border border-info/20 bg-info/5 flex items-start gap-3">
+                                                     <Sparkles className="w-4 h-4 text-info mt-1" />
+                                                     <div>
+                                                         <div className="text-xs font-mono font-bold text-info uppercase">Portfolio Live</div>
+                                                         <p className="text-[10px] text-[#a1a1aa] mt-1">Your profile is now discoverable. Share your link to showcase your rank, XP, and completed courses.</p>
+                                                         <a href={`/portfolio/${username}`} target="_blank" className="inline-block mt-2 text-[10px] font-bold underline hover:text-white transition-colors">Vist My Portfolio →</a>
+                                                     </div>
+                                                 </div>
+                                             )}
+                                         </div>
+
+                                         <div className="pt-6 mt-2 border-t border-[#1a1a1a] flex items-center justify-between">
+                                             <span className={`text-xs font-mono font-bold ${saveMessage.includes('Error') ? 'text-[#FF3131]' : ''}`} style={!saveMessage.includes('Error') ? { color: accent } : {}}>
+                                                 {saveMessage}
+                                             </span>
+                                             <button type="submit" disabled={isSaving || (username === (profile?.username || "") && isPublic === !!profile?.is_public)}
+                                                 className="flex items-center gap-2 px-6 py-2.5 border text-xs font-mono font-bold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                 style={{ borderColor: `${accent}80`, backgroundColor: `${accent}19`, color: accent, clipPath: "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" }}>
+                                                 {isSaving ? <Activity className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                                 {isSaving ? 'UPLOADING...' : 'UPDATE PORTFOLIO'}
+                                             </button>
+                                         </div>
+                                     </form>
+                                 </motion.div>
+                             )}
                             {/* ─── IDENTITY ─── */}
                             {activeTab === "identity" && (
                                 <motion.div key="identity" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }} className="space-y-6">

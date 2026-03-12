@@ -3,13 +3,13 @@
 import { useState, useEffect, useTransition } from "react"
 import {
     getAdminCourses, toggleCoursePublish, toggleCoursePremium,
-    updateCourseDetails, deleteCourse, createCourse
+    updateCourseDetails, deleteCourse, createCourse, getAdminStats
 } from "@/app/actions/admin"
 import Link from "next/link"
 import {
     BookOpen, Edit3, Eye, EyeOff, Star, Save, X,
     Loader2, Check, AlertCircle, Lock, Globe, RefreshCw,
-    Trash2, Plus, Search
+    Trash2, Plus, Search, Users, PieChart, TrendingUp, Download
 } from "lucide-react"
 
 const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced"]
@@ -29,6 +29,7 @@ export default function AdminCoursesPage() {
     const [showCreate, setShowCreate] = useState(false)
     const [newVal, setNewVal] = useState<NewCourseValues>(EMPTY_NEW)
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+    const [stats, setStats] = useState<any>(null)
     const [toast, setToast] = useState<{ type: "ok" | "err"; msg: string } | null>(null)
 
     const notify = (type: "ok" | "err", msg: string) => {
@@ -37,8 +38,9 @@ export default function AdminCoursesPage() {
     }
 
     const load = () => startTransition(async () => {
-        const res = await getAdminCourses()
-        if (res.success && res.courses) setCourses(res.courses)
+        const [cRes, sRes] = await Promise.all([getAdminCourses(), getAdminStats()])
+        if (cRes.success && cRes.courses) setCourses(cRes.courses)
+        if (sRes.success) setStats(sRes.stats)
         setLoading(false)
     })
 
@@ -135,6 +137,17 @@ export default function AdminCoursesPage() {
                     <p className="text-[#555] text-xs mt-1 font-mono">Edit details, publish/unpublish, change tier — updates appear live on the site.</p>
                 </div>
                 <div className="flex items-center gap-2">
+                    <button onClick={async () => {
+                        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(courses, null, 2));
+                        const downloadAnchorNode = document.createElement('a');
+                        downloadAnchorNode.setAttribute("href", dataStr);
+                        downloadAnchorNode.setAttribute("download", "courses_export.json");
+                        document.body.appendChild(downloadAnchorNode);
+                        downloadAnchorNode.click();
+                        downloadAnchorNode.remove();
+                    }} className="flex items-center gap-2 px-3 py-2 border border-[#1a1a1a] text-xs text-[#555] hover:text-white hover:border-[#333] transition-all font-mono uppercase tracking-wider">
+                        <Download className="h-3.5 w-3.5" /> Export JSON
+                    </button>
                     <button onClick={load} disabled={isPending}
                         className="flex items-center gap-2 px-3 py-2 border border-[#1a1a1a] text-xs text-[#555] hover:text-[#f26722] hover:border-[#f26722]/30 transition-all font-mono uppercase tracking-wider">
                         <RefreshCw className={`h-3.5 w-3.5 ${isPending ? "animate-spin" : ""}`} /> Refresh
@@ -145,6 +158,32 @@ export default function AdminCoursesPage() {
                     </button>
                 </div>
             </div>
+
+            {/* Stats Row */}
+            {stats && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-4 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-1 opacity-5 group-hover:opacity-10 transition-opacity"><Users className="h-12 w-12" /></div>
+                        <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-[#444]">Total Users</span>
+                        <div className="text-xl font-black text-white mt-1">{stats.totalUsers}</div>
+                    </div>
+                    <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-4 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-1 opacity-5 group-hover:opacity-10 transition-opacity"><BookOpen className="h-12 w-12" /></div>
+                        <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-[#444]">Courses</span>
+                        <div className="text-xl font-black text-white mt-1">{stats.totalCourses}</div>
+                    </div>
+                    <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-4 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-1 opacity-5 group-hover:opacity-10 transition-opacity"><TrendingUp className="h-12 w-12" /></div>
+                        <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-[#444]">Enrollments</span>
+                        <div className="text-xl font-black text-[#f26722] mt-1">{stats.totalEnrollments}</div>
+                    </div>
+                    <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-4 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-1 opacity-5 group-hover:opacity-10 transition-opacity"><PieChart className="h-12 w-12" /></div>
+                        <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-[#444]">New (Today)</span>
+                        <div className="text-xl font-black text-info mt-1">+{stats.newUsersToday}</div>
+                    </div>
+                </div>
+            )}
 
             {/* Create Form */}
             {showCreate && (
@@ -258,7 +297,7 @@ export default function AdminCoursesPage() {
                             <div className="flex items-center gap-3 text-[10px] text-[#333] font-mono mb-5">
                                 <span>{course.module_count ?? 0} modules</span>
                                 <span>·</span>
-                                <span>{course.lesson_count ?? 0} lessons</span>
+                                <span className="text-[#f26722]/80 font-bold">{course.enrollment_count ?? 0} students</span>
                                 {course.difficulty && <><span>·</span><span>{course.difficulty}</span></>}
                                 {course.duration_hours > 0 && <><span>·</span><span>{course.duration_hours}h</span></>}
                             </div>

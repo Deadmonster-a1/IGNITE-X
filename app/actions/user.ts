@@ -107,3 +107,54 @@ export async function getUserEnrollmentsWithProgress() {
 
     return processedEnrollments
 }
+export async function getPublicProfile(username: string) {
+    const supabase = await createClient()
+
+    // Fetch profile by username
+    const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id, name, bio, xp, avatar_url, is_public, streak_count, created_at')
+        .eq('username', username)
+        .eq('is_public', true)
+        .single()
+
+    if (error || !profile) {
+        console.error("Public profile not found or private:", error)
+        return null
+    }
+
+    // Determine Rank
+    let rank = "Initiate"
+    if (profile.xp >= 500) rank = "Operative"
+    if (profile.xp >= 2000) rank = "Specialist"
+    if (profile.xp >= 5000) rank = "Architect"
+    if (profile.xp >= 10000) rank = "Prime"
+
+    // Fetch completed courses for this user
+    const { data: progress } = await supabase
+        .from('lesson_progress')
+        .select(`
+            lesson:lessons (
+                module:modules (
+                    course:courses (id, title, slug, thumbnail_url, difficulty)
+                )
+            )
+        `)
+        .eq('user_id', profile.id)
+        .eq('status', 'completed')
+
+    // Extract unique courses from progress
+    const coursesMap = new Map()
+    progress?.forEach((p: any) => {
+        const course = p.lesson?.module?.course
+        if (course && !coursesMap.has(course.id)) {
+            coursesMap.set(course.id, course)
+        }
+    })
+
+    return {
+        ...profile,
+        rank,
+        completedCourses: Array.from(coursesMap.values())
+    }
+}

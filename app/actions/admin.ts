@@ -62,7 +62,8 @@ export async function banUser(userId: string, banned: boolean) {
 // ─── Courses ─────────────────────────────────────────────────
 export async function getAdminCourses() {
     const supabase = await createClient()
-    // Try with enhanced columns first; fall back to base columns if migration hasn't run yet
+    
+    // Fetch base courses
     let { data, error } = await supabase
         .from("courses")
         .select(`
@@ -73,7 +74,6 @@ export async function getAdminCourses() {
         .order("created_at", { ascending: false })
 
     if (error) {
-        // Fallback: query only base columns that definitely exist
         const fallback = await supabase
             .from("courses")
             .select(`id, title, description, is_published, is_premium, created_at, modules:modules(count)`)
@@ -81,12 +81,23 @@ export async function getAdminCourses() {
         if (fallback.error) return { success: false, error: fallback.error.message }
         data = fallback.data as any
     }
-    const formatted = (data || []).map((c: any) => ({
-        ...c,
-        module_count: c.modules?.[0]?.count ?? 0,
-        lesson_count: 0, // Lessons would require a separate query or RPC
+
+    // Fetch enrollments count for each course
+    const coursesWithStats = await Promise.all((data || []).map(async (c: any) => {
+        const { count } = await supabase
+            .from("enrollments")
+            .select("*", { count: "exact", head: true })
+            .eq("course_id", c.id)
+
+        return {
+            ...c,
+            module_count: c.modules?.[0]?.count ?? 0,
+            lesson_count: 0, 
+            enrollment_count: count ?? 0
+        }
     }))
-    return { success: true, courses: formatted }
+
+    return { success: true, courses: coursesWithStats }
 }
 
 export async function toggleCoursePublish(courseId: string, isPublished: boolean) {
