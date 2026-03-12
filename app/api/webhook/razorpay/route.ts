@@ -3,15 +3,23 @@ import { createClient } from "@supabase/supabase-js"
 import crypto from "crypto"
 import { headers } from "next/headers"
 
-// We use the service role key here because this is a server-to-server webhook.
-// RLS policies would block a standard anon client from modifying subscription status.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+// Mark as dynamic to ensure environment variables are available at runtime
+export const dynamic = 'force-dynamic'
 
 const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || "whsec_placeholder"
 
 export async function POST(req: Request) {
+    try {
+        // Initialize Supabase client inside the handler
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+        
+        if (!supabaseUrl) {
+            console.error("[RAZORPAY_WEBHOOK_ERROR] Missing Supabase URL")
+            return new NextResponse("Configuration error", { status: 500 })
+        }
+
+        const supabase = createClient(supabaseUrl, supabaseServiceKey)
     try {
         const body = await req.text()
         const signature = (await headers()).get("X-Razorpay-Signature")
