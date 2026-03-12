@@ -20,7 +20,6 @@ export async function POST(req: Request) {
         }
 
         const supabase = createClient(supabaseUrl, supabaseServiceKey)
-    try {
         const body = await req.text()
         const signature = (await headers()).get("X-Razorpay-Signature")
 
