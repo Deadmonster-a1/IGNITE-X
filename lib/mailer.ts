@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer"
-
+import { getSiteUrl } from "@/lib/utils"
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
     port: parseInt(process.env.SMTP_PORT || "587"),
@@ -101,7 +101,7 @@ export function loginAlertEmail(opts: {
       </div>
       <div class="warn-box">
         <strong style="color:#f26722;">⚠ Wasn't you?</strong><br>
-        Reset your password immediately at <a href="${process.env.NEXT_PUBLIC_SITE_URL}/forgot-password" style="color:#f26722;">${process.env.NEXT_PUBLIC_SITE_URL}/forgot-password</a>
+        Reset your password immediately at <a href="${getSiteUrl()}/forgot-password" style="color:#f26722;">${getSiteUrl()}/forgot-password</a>
       </div>
     `),
     }
@@ -120,7 +120,7 @@ export function passwordChangedEmail(opts: { email: string; time: string }): Mai
       <div class="warn-box">
         <strong style="color:#f26722;">⚠ Wasn't you?</strong><br>
         Contact support immediately or try to regain access at 
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL}/forgot-password" style="color:#f26722;">forgot-password</a>.
+        <a href="${getSiteUrl()}/forgot-password" style="color:#f26722;">forgot-password</a>.
       </div>
     `),
     }
@@ -155,7 +155,7 @@ export function signupWelcomeEmail(opts: { email: string; name: string }): MailP
         <div class="info-row"><span class="label">IDENTITY: </span><span class="value">${opts.email}</span></div>
         <div class="info-row"><span class="label">STATUS:   </span><span class="value" style="color:#4ade80;">ACTIVE</span></div>
       </div>
-      <p>Start your journey at your <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard" style="color:#f26722;">dashboard</a>. Choose a learning path and begin your mission.</p>
+      <p>Start your journey at your <a href="${getSiteUrl()}/dashboard" style="color:#f26722;">dashboard</a>. Choose a learning path and begin your mission.</p>
     `),
     }
 }

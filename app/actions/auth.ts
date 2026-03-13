@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
 import { sendMail, loginAlertEmail, signupWelcomeEmail } from "@/lib/mailer"
 import { headers } from "next/headers"
+import { getSiteUrl } from "@/lib/utils"
 
 export async function login(formData: FormData) {
     const supabase = await createClient()
@@ -109,7 +110,7 @@ export async function signout() {
 
 export async function signInWithGoogle() {
     const supabase = await createClient()
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const siteUrl = getSiteUrl()
 
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',

@@ -148,12 +148,12 @@ export function Courses() {
         // Inject the hardcoded DSA course at the top
         mapped.unshift({
           id: "DSA-H-001",
-          title: "DSA for Detectives",
-          description: "To upgrade your training as a rookie detective, we must move beyond just knowing names and start understanding the DNA of computing.",
+          title: "DSA for Beginners",
+          description: "Start your DSA journey from scratch. Chapter 1 teaches you to think like a programmer — algorithms, pseudocode, and flowcharts.",
           category: "DSA",
           level: "Beginner",
           weeks: "Self-Paced",
-          lessons: 5,
+          lessons: 10,
           projects: 0,
           icon: Braces,
           is_premium: false,
