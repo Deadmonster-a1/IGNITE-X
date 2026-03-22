@@ -2,19 +2,28 @@ import {
     Lightbulb, Coffee, ArrowRightLeft, Ruler, ListChecks, FileText,
     GitBranch, Trophy, CheckCircle, GraduationCap, TerminalSquare,
     Calculator, Thermometer, Box, Database, Clock, LayoutList, Type,
-    Search, ArrowUpDown, RefreshCcw, Lock, Code2, Cpu, Hash, Target
+    Search, ArrowUpDown, RefreshCcw, Lock, Code2, Cpu, Hash, Target, Hexagon
 } from "lucide-react"
 
 export const courseInfo = {
-    title: "DSA for Beginners",
-    subtitle: "A Visual Guide from Beginner to Interview Mastery",
-    totalLessons: 42,
+    title: "The Algorithm Matrix",
+    subtitle: "Navigate the System. Master the Code.",
+    totalMissions: 42,
     estimatedTime: "20+ hours",
-    difficulty: "Beginner",
-    xpReward: 5000,
+    difficulty: "Adaptive",
+    totalXP: 25000,
 }
 
-export type LessonType = 'concept' | 'practice';
+export type LessonType = 'concept' | 'mission' | 'practice';
+export type Difficulty = 'beginner' | 'intermediate' | 'expert' | 'master';
+
+export interface QuizQuestion {
+    id: string;
+    question: string;
+    options: string[];
+    correctAnswer: number;
+    explanation: string;
+}
 
 export interface Lesson {
     id: string;
@@ -25,20 +34,26 @@ export interface Lesson {
     code: string;
     tldr: string;
     type: LessonType;
+    difficulty?: Difficulty;
+    xpReward?: number;
     isLocked?: boolean;
+    quiz?: QuizQuestion[];
 }
 
 export interface Chapter {
     id: string;
     title: string;
+    difficulty?: Difficulty;
     concepts: Lesson[];
-    problems: Lesson[];
+    missions?: Lesson[];
+    problems?: Lesson[]; // Keep for backward compatibility during migration
 }
 
 export interface Part {
     id: string;
     title: string;
     chapters: Chapter[];
+    unlockLevel?: number;
 }
 
 const lockedLesson = (title: string, type: LessonType): Lesson => ({
@@ -46,10 +61,12 @@ const lockedLesson = (title: string, type: LessonType): Lesson => ({
     title,
     icon: type === 'concept' ? BookOpen : Code2,
     color: "#6b7280",
-    description: "This lesson is currently locked. Complete previous chapters to unlock this content.",
-    code: `// Content locked\n// Keep learning to unlock this lesson.`,
-    tldr: "Keep learning to unlock this lesson.",
+    description: "This mission is currently encrypted. Advance your level to unlock.",
+    code: `// ACCESS DENIED\n// Mission encrypted. Level too low.`,
+    tldr: "Level up to unlock this mission.",
     type,
+    difficulty: 'beginner',
+    xpReward: 0,
     isLocked: true,
 });
 
@@ -73,6 +90,20 @@ export const courseCurriculum: Part[] = [
                         code: `START\n  Step 1: Boil water\n  Step 2: Add tea leaves\n  Step 3: Add sugar\n  Step 4: Pour into cup\nEND\n\nResult: A perfect cup of tea!`,
                         tldr: "An algorithm is a step-by-step recipe to solve a problem.",
                         type: 'concept',
+                        quiz: [
+                            {
+                                id: "q1",
+                                question: "Which of the following best describes an algorithm?",
+                                options: [
+                                    "A random set of numbers",
+                                    "A step-by-step recipe to solve a problem",
+                                    "A hardware component of a computer",
+                                    "A mysterious code that only geniuses understand"
+                                ],
+                                correctAnswer: 1,
+                                explanation: "An algorithm is essentially a logical sequence of steps designed to achieve a specific outcome or solve a problem."
+                            }
+                        ]
                     },
                     {
                         id: "everyday_algorithms",
@@ -83,6 +114,20 @@ export const courseCurriculum: Part[] = [
                         code: `Algorithm: Cross The Road\n\nSTART\n  Step 1: Go to the edge of the road\n  Step 2: Look left and right\n  Step 3: IF no vehicles are near\n            THEN walk across\n          ELSE\n            wait and repeat Step 2\nEND`,
                         tldr: "You already run algorithms in your head every day.",
                         type: 'concept',
+                        quiz: [
+                            {
+                                id: "q2",
+                                question: "What is the common structure of most computational tasks?",
+                                options: [
+                                    "Start → Middle → End",
+                                    "Code → Debug → Ship",
+                                    "Input → Process → Output",
+                                    "Click → Wait → Results"
+                                ],
+                                correctAnswer: 2,
+                                explanation: "Computational tasks focus on taking data (Input), performing logic on it (Process), and returning a result (Output)."
+                            }
+                        ]
                     },
                     {
                         id: "input_process_output",
@@ -771,14 +816,120 @@ export const courseCurriculum: Part[] = [
                         type: 'concept',
                     },
                     {
-                        id: "infinite_recursion",
-                        title: "Dangers of infinite recursion",
-                        icon: Target,
-                        color: "#f59e0b",
-                        description: "What happens if you cause Infinite Recursion? Will it run forever?\n\nNo! Remember the Call Stack? The computer only sets aside a limited amount of memory for it. If you keep pushing plates onto the stack forever, the stack will overflow and crash the program.\n\nThis error is literally called a **Stack Overflow**. (Yes, like the website!)",
-                        code: `Function BadRecursion():\n   print("Uh oh")\n   BadRecursion()  // No base case!\n\nResult:\n"Uh oh"\n"Uh oh"\n"Uh oh"\n... Error: StackOverflowException`,
-                        tldr: "Missing a base case fills up memory and causes a Stack Overflow error.",
-                        type: 'concept',
+                        id: "writing-pseudocode",
+                        title: "Writing Pseudocode",
+                        icon: FileText,
+                        color: "#00ffcc",
+                        tldr: "Plan your code logic before you write it. It's like a blueprint for your algorithm.",
+                        description: "Pseudocode is an informal high-level description of the operating principle of a computer program or other algorithm. It uses the structural conventions of a normal programming language, but is intended for human reading rather than machine reading. It helps in planning the logic of an algorithm before translating it into a specific programming language.",
+                        code: "FUNCTION calculate_total_price(items):\n  SET total = 0\n  FOR EACH item IN items:\n    ADD item.price TO total\n  RETURN total",
+                        type: "mission",
+                        xpReward: 200,
+                        isLocked: false,
+                        quiz: [
+                            {
+                                id: "q7",
+                                question: "What is the primary purpose of writing pseudocode?",
+                                options: [
+                                    "To generate machine-executable code directly",
+                                    "To explain the logic of an algorithm in human-readable terms",
+                                    "To optimize the memory usage of an application",
+                                    "To define the database schema"
+                                ],
+                                correctAnswer: 1,
+                                explanation: "Pseudocode focuses on the logic of the algorithm rather than the specific syntax of a programming language."
+                            }
+                        ]
+                    },
+                    {
+                        id: "time-complexity-mapping",
+                        title: "Time Complexity Mapping",
+                        icon: Hexagon,
+                        color: "#00ffcc",
+                        tldr: "Map out how algorithms scale. Visualizing the cost of computation.",
+                        description: "Mapping out the time complexity of various algorithms helps in comparing their efficiency. It involves analyzing how the number of operations increases as the input size grows.",
+                        code: "def compare_growth(n):\n    # O(log n)\n    # O(n)\n    # O(n^2)\n    pass",
+                        type: "mission",
+                        xpReward: 200,
+                        isLocked: false,
+                        quiz: [
+                            {
+                                id: "q8",
+                                question: "Which function represents quadratic time complexity?",
+                                options: [
+                                    "O(n)",
+                                    "O(1)",
+                                    "O(n^2)",
+                                    "O(log n)"
+                                ],
+                                correctAnswer: 2,
+                                explanation: "n^2 is quadratic growth, common in nested loops over the same input."
+                            }
+                        ]
+                    },
+                    {
+                        id: "big-o-notation",
+                        title: "Big O Notation",
+                        icon: Hexagon,
+                        color: "#00ffcc",
+                        tldr: "The language of algorithm efficiency. We measure scaling, not speed.",
+                        description: "Big O notation is a mathematical notation that describes the limiting behavior of a function when the argument tends towards a particular value or infinity.\n\nIn computer science, Big O notation is used to classify algorithms according to how their run time or space requirements grow as the input size grows. It provides a high-level understanding of the algorithm's performance.\n\nCommon complexities include O(1), O(log n), O(n), O(n log n), O(n²), and O(2ⁿ).",
+                        code: "def sum_list(n):\n    result = 0\n    for i in range(n):\n        result += i\n    return result\n# Complexity: O(n)",
+                        type: "concept",
+                        xpReward: 150,
+                        isLocked: false,
+                        quiz: [
+                            {
+                                id: "q4",
+                                question: "What does O(n) complexity indicate about an algorithm's performance?",
+                                options: [
+                                    "The runtime is constant regardless of input size",
+                                    "The runtime grows linearly with the input size",
+                                    "The runtime grows exponentially",
+                                    "The runtime is unpredictable"
+                                ],
+                                correctAnswer: 1,
+                                explanation: "O(n) means the execution time increases in direct proportion to the size of the input data (n)."
+                            },
+                            {
+                                id: "q5",
+                                question: "Which of these is the most efficient Big O complexity for large inputs?",
+                                options: [
+                                    "O(n)",
+                                    "O(n^2)",
+                                    "O(log n)",
+                                    "O(2^n)"
+                                ],
+                                correctAnswer: 2,
+                                explanation: "Logarithmic time O(log n) is significantly more efficient than linear O(n) or quadratic O(n^2) for large datasets."
+                            }
+                        ]
+                    },
+                    {
+                        id: "space-complexity",
+                        title: "Space Complexity",
+                        icon: Cpu,
+                        color: "#00ffcc",
+                        tldr: "How much memory does your algorithm consume? Every bite counts in the matrix.",
+                        description: "While time complexity is about speed, space complexity is about memory usage. It measures the total amount of memory that an algorithm or program uses, including the space needed for the input and the auxiliary space used during execution.\n\nJust like time complexity, we use Big O notation to describe how the space requirements grow with the input size.",
+                        code: "def create_matrix(n):\n    # Space: O(n^2)\n    return [[0] * n for _ in range(n)]",
+                        type: "concept",
+                        xpReward: 150,
+                        isLocked: false,
+                        quiz: [
+                            {
+                                id: "q6",
+                                question: "If an algorithm creates a new list with size equal to the input 'n', what is its space complexity?",
+                                options: [
+                                    "O(1)",
+                                    "O(n)",
+                                    "O(n^2)",
+                                    "O(log n)"
+                                ],
+                                correctAnswer: 1,
+                                explanation: "Creating a data structure of size 'n' requires linear space, O(n)."
+                            }
+                        ]
                     },
                 ],
                 problems: [
@@ -838,7 +989,7 @@ courseCurriculum.forEach(part => {
         chapter.concepts.forEach(concept => {
             lessons.push({ ...concept, number: idx++, chapterTitle: chapter.title, sectionTitle: "Concepts" });
         });
-        chapter.problems.forEach(problem => {
+        (chapter.problems || []).forEach(problem => {
             lessons.push({ ...problem, number: idx++, chapterTitle: chapter.title, sectionTitle: "Practice Problems" });
         });
     });

@@ -1,19 +1,12 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { gsap } from "gsap"
 import { useScrollReveal } from "@/hooks/use-gsap"
 import { SectionBot } from "@/components/section-bot"
 import { RobotDock } from "@/components/robot-dock"
 import {
-  Users,
-  Rocket,
-  Monitor,
-  Briefcase,
-  MessageCircle,
-  Braces,
-  Target,
-  Lightbulb,
+  Users, Rocket, Monitor, Briefcase, MessageCircle, Braces, Target, Lightbulb,
 } from "lucide-react"
 
 interface PlatformStats {
@@ -23,79 +16,90 @@ interface PlatformStats {
   paths: string
 }
 
+function useCountUp(target: string, active: boolean) {
+  const [display, setDisplay] = useState("0")
+  useEffect(() => {
+    if (!active) return
+    const num = parseFloat(target.replace(/[^0-9.]/g, ""))
+    const suffix = target.replace(/[0-9.]/g, "")
+    if (isNaN(num)) { setDisplay(target); return }
+    let start = 0
+    const duration = 1400
+    const step = 16
+    const steps = duration / step
+    const increment = num / steps
+    let count = 0
+    const timer = setInterval(() => {
+      count += increment
+      if (count >= num) { clearInterval(timer); setDisplay(target); return }
+      setDisplay(count >= 10 ? Math.floor(count).toString() + suffix : count.toFixed(1) + suffix)
+    }, step)
+    return () => clearInterval(timer)
+  }, [target, active])
+  return display
+}
+
+function StatMetric({ value, label }: { value: string; label: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState(false)
+  const display = useCountUp(value, active)
+
+  useEffect(() => {
+    if (!ref.current) return
+    const observer = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) setActive(true) }, { threshold: 0.5 })
+    observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={ref} className="text-right">
+      <p className="font-mono font-black text-2xl text-foreground">{display}</p>
+      <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+    </div>
+  )
+}
+
 export function Features({ stats }: { stats?: PlatformStats }) {
   const features = [
     {
-      id: "01",
-      title: "1-on-1 Mentorship",
-      description:
-        "Weekly personalized sessions with senior engineers from Google, Meta, and Stripe. Get code reviews, career guidance, and real accountability.",
-      icon: Users,
-      metric: stats?.avgRating || "4.9/5",
-      metricLabel: "Avg. Rating",
+      id: "01", title: "1-on-1 Mentorship",
+      description: "Weekly personalized sessions with senior engineers from Google, Meta, and Stripe. Get code reviews, career guidance, and real accountability.",
+      icon: Users, metric: stats?.avgRating || "4.9/5", metricLabel: "Avg. Rating",
     },
     {
-      id: "02",
-      title: "DSA Interview Prep",
-      description:
-        "200+ curated problems with video walkthroughs covering arrays, trees, graphs, DP, and more. Mock interviews with real FAANG interviewers.",
-      icon: Braces,
-      metric: "200+",
-      metricLabel: "Problems",
+      id: "02", title: "DSA Interview Prep",
+      description: "200+ curated problems with video walkthroughs covering arrays, trees, graphs, DP, and more. Mock interviews with real FAANG interviewers.",
+      icon: Braces, metric: "200+", metricLabel: "Problems",
     },
     {
-      id: "03",
-      title: "Real-World Projects",
-      description:
-        "Build production apps from day one. Deploy to Vercel, integrate Stripe payments, implement auth, and handle real user traffic.",
-      icon: Rocket,
-      metric: stats?.projects || "12+",
-      metricLabel: "Shipped Apps",
+      id: "03", title: "Real-World Projects",
+      description: "Build production apps from day one. Deploy to Vercel, integrate Stripe payments, implement auth, and handle real user traffic.",
+      icon: Rocket, metric: stats?.projects || "12+", metricLabel: "Shipped Apps",
     },
     {
-      id: "04",
-      title: "Live Coding Sessions",
-      description:
-        "Daily live-coding workshops where instructors build features in real-time. Pair-program, ask questions, learn debugging techniques.",
-      icon: Monitor,
-      metric: "5x",
-      metricLabel: "Per Week",
+      id: "04", title: "Live Coding Sessions",
+      description: "Daily live-coding workshops where instructors build features in real-time. Pair-program, ask questions, learn debugging techniques.",
+      icon: Monitor, metric: "5x", metricLabel: "Per Week",
     },
     {
-      id: "05",
-      title: "Career Accelerator",
-      description:
-        "Resume reviews, mock interviews, portfolio building, and direct introductions to hiring managers at top-tier companies.",
-      icon: Briefcase,
-      metric: "94%",
-      metricLabel: "Placement",
+      id: "05", title: "Career Accelerator",
+      description: "Resume reviews, mock interviews, portfolio building, and direct introductions to hiring managers at top-tier companies.",
+      icon: Briefcase, metric: "94%", metricLabel: "Placement",
     },
     {
-      id: "06",
-      title: "Community Network",
-      description:
-        "Join a private cohort of ambitious developers. Collaborate on projects, share knowledge, and build lifelong professional connections.",
-      icon: MessageCircle,
-      metric: stats?.members || "2.4K+",
-      metricLabel: "Members",
+      id: "06", title: "Community Network",
+      description: "Join a private cohort of ambitious developers. Collaborate on projects, share knowledge, and build lifelong professional connections.",
+      icon: MessageCircle, metric: stats?.members || "2.4K+", metricLabel: "Members",
     },
     {
-      id: "07",
-      title: "Algorithm Visualizer",
-      description:
-        "Interactive visual tool to step through sorting algorithms, graph traversals, and tree operations at your own pace.",
-      icon: Target,
-      metric: "50+",
-      metricLabel: "Visualizations",
+      id: "07", title: "Algorithm Visualizer",
+      description: "Interactive visual tool to step through sorting algorithms, graph traversals, and tree operations at your own pace.",
+      icon: Target, metric: "50+", metricLabel: "Visualizations",
     },
     {
-      id: "08",
-      title: "Learning Paths",
-      description:
-        "Personalized roadmaps that adapt to your skill level, career goals, and learning pace. Never wonder what to learn next.",
-      icon: Lightbulb,
-      metric: stats?.paths || "8",
-      metricLabel: "Paths",
+      id: "08", title: "Learning Paths",
+      description: "Personalized roadmaps that adapt to your skill level, career goals, and learning pace. Never wonder what to learn next.",
+      icon: Lightbulb, metric: stats?.paths || "8", metricLabel: "Paths",
     },
   ]
 
@@ -107,20 +111,11 @@ export function Features({ stats }: { stats?: PlatformStats }) {
     const cards = gridRef.current.querySelectorAll(".feature-card")
     const ctx = gsap.context(() => {
       cards.forEach((card, i) => {
-        gsap.fromTo(
-          card,
+        gsap.fromTo(card,
           { y: 50, opacity: 0 },
           {
-            y: 0,
-            opacity: 1,
-            duration: 0.7,
-            delay: i * 0.06,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: card,
-              start: "top 88%",
-              toggleActions: "play none none none",
-            },
+            y: 0, opacity: 1, duration: 0.7, delay: i * 0.06, ease: "power3.out",
+            scrollTrigger: { trigger: card, start: "top 88%", toggleActions: "play none none none" },
           }
         )
       })
@@ -129,11 +124,14 @@ export function Features({ stats }: { stats?: PlatformStats }) {
   }, [])
 
   return (
-    <section id="features" className="scan-line relative border-y border-accent/10 bg-secondary/30 py-20 lg:py-28">
+    <section id="features" className="scan-line relative border-y border-accent/10 bg-secondary/20 py-20 lg:py-28 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-grid-cyber opacity-30" aria-hidden="true" />
+      {/* Aurora subtle glow */}
+      <div className="aurora-orb aurora-orb-accent pointer-events-none absolute right-0 top-0 h-64 w-64 opacity-50" aria-hidden="true" />
+
       {/* Cyberpunk corners */}
-      <div className="pointer-events-none absolute left-4 top-4 h-12 w-12 border-l-2 border-t-2 border-accent/15" aria-hidden="true" />
-      <div className="pointer-events-none absolute bottom-4 right-4 h-12 w-12 border-b-2 border-r-2 border-accent/15" aria-hidden="true" />
+      <div className="pointer-events-none absolute left-4 top-4 h-12 w-12 border-l-2 border-t-2 border-accent/20" aria-hidden="true" />
+      <div className="pointer-events-none absolute bottom-4 right-4 h-12 w-12 border-b-2 border-r-2 border-accent/20" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-7xl px-5 lg:px-8">
         {/* Header */}
@@ -148,11 +146,7 @@ export function Features({ stats }: { stats?: PlatformStats }) {
                 Why ASCI Works
               </h2>
               <SectionBot variant="features" className="hidden md:inline-flex mb-1" />
-              <RobotDock
-                id="features"
-                label="SCAN-BOT"
-                className="hidden lg:flex h-[200px] w-[160px] shrink-0 mb-1"
-              />
+              <RobotDock id="features" label="SCAN-BOT" className="hidden lg:flex h-[200px] w-[160px] shrink-0 mb-1" />
             </div>
             <p className="max-w-md text-sm text-muted-foreground">
               Everything you need to go from beginner to hired engineer, in one cohort-based program.
@@ -167,28 +161,29 @@ export function Features({ stats }: { stats?: PlatformStats }) {
             return (
               <div
                 key={feature.id}
-                className={`feature-card cyber-corner group relative flex flex-col overflow-hidden border border-border bg-card transition-all duration-500 hover:scale-[1.03] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(242,103,34,0.15)] hover:border-accent/50 z-10 hover:z-20 ${isWide ? "lg:col-span-2" : ""
-                  }`}
+                className={`feature-card cyber-corner group relative flex flex-col overflow-hidden border border-border transition-all duration-500 hover:border-accent/50 z-10 hover:z-20 card-interactive ${isWide ? "lg:col-span-2" : ""}`}
               >
+                {/* Glass background layer */}
+                <div className="absolute inset-0 bg-card opacity-80 transition-opacity group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/0 to-accent/0 transition-all duration-500 group-hover:from-accent/5 group-hover:to-transparent" />
+
                 {/* ID watermark */}
                 <div className="pointer-events-none absolute right-3 top-3 font-mono text-[9px] text-muted-foreground/20">
                   [{feature.id}]
                 </div>
 
-                <div className={`flex flex-1 flex-col ${isWide ? "p-6 lg:p-8" : "p-5"}`}>
+                {/* Accent top line */}
+                <div className="relative h-0.5 w-full overflow-hidden bg-border/50">
+                  <div className="absolute inset-0 h-full w-0 bg-accent transition-all duration-700 group-hover:w-full" />
+                </div>
+
+                <div className={`relative flex flex-1 flex-col ${isWide ? "p-6 lg:p-8" : "p-5"}`}>
                   {/* Top row: icon + metric */}
                   <div className="flex items-start justify-between">
-                    <div className="flex h-11 w-11 items-center justify-center border border-accent/20 bg-accent/10 transition-all group-hover:bg-accent/15 group-hover:border-accent/50">
-                      <feature.icon className="h-5 w-5 text-accent" />
+                    <div className={`flex items-center justify-center border border-accent/20 bg-accent/10 transition-all group-hover:bg-accent/20 group-hover:border-accent/50 group-hover:shadow-[0_0_20px_rgba(242,103,34,0.2)] ${isWide ? "h-12 w-12" : "h-10 w-10"}`}>
+                      <feature.icon className={`text-accent ${isWide ? "h-6 w-6" : "h-5 w-5"}`} />
                     </div>
-                    <div className="text-right">
-                      <p className={`font-mono font-bold text-foreground ${isWide ? "text-2xl" : "text-lg"}`}>
-                        {feature.metric}
-                      </p>
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                        {feature.metricLabel}
-                      </p>
-                    </div>
+                    <StatMetric value={feature.metric} label={feature.metricLabel} />
                   </div>
 
                   {/* Content */}
@@ -201,10 +196,12 @@ export function Features({ stats }: { stats?: PlatformStats }) {
                     </p>
                   </div>
 
-                  {/* Accent bar at bottom */}
+                  {/* Bottom accent bar */}
                   <div className="mt-auto pt-5">
-                    <div className="h-0.5 w-full overflow-hidden bg-border">
-                      <div className="h-full w-0 bg-accent transition-all duration-700 group-hover:w-full" />
+                    <div className="flex items-center justify-between">
+                      <div className="h-px flex-1 overflow-hidden bg-border">
+                        <div className="h-full w-0 bg-accent transition-all duration-700 group-hover:w-full" />
+                      </div>
                     </div>
                   </div>
                 </div>

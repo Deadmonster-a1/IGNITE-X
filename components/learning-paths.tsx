@@ -245,7 +245,10 @@ export function LearningPaths() {
               return (
                 <div key={path.phase} className="path-card relative lg:py-6">
                   {/* Dot on center line */}
-                  <div className="absolute left-1/2 top-1/2 hidden h-4 w-4 -translate-x-1/2 -translate-y-1/2 border-2 border-accent bg-background lg:block shadow-[0_0_10px_rgba(242,103,34,0.5)]" aria-hidden="true" />
+                  <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:block" aria-hidden="true">
+                    <div className="h-4 w-4 border-2 border-accent bg-background shadow-[0_0_14px_rgba(242,103,34,0.6)] animate-glow-pulse" />
+                    <div className="absolute inset-0 scale-150 animate-pulse-ring border border-accent/30" />
+                  </div>
 
                   <div className={`flex lg:w-1/2 ${isLeft ? "lg:pr-12" : "lg:ml-auto lg:pl-12"}`}>
                     <div className={`cyber-corner flex w-full flex-col overflow-hidden border ${path.borderColor} bg-card transition-all duration-300 hover:border-accent/80 hover:shadow-[0_10px_30px_rgba(242,103,34,0.1)] hover:-translate-y-1`}>

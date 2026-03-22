@@ -219,7 +219,20 @@ function SceneContent({ targetRotY, scrollState }: {
       <directionalLight position={[5, 8, 5]} intensity={1.2} color="#fff5ee" />
       <directionalLight position={[-4, 4, -2]} intensity={0.4} color="#e0e8ff" />
       <pointLight position={[0, 3, -4]} intensity={0.5} color="#00ff00" distance={10} decay={2} />
-      <Environment preset="studio" />
+      <Environment key="custom-env">
+        <mesh position={[0, 5, -10]} scale={[10, 10, 1]}>
+          <planeGeometry />
+          <meshBasicMaterial color="#ffffff" />
+        </mesh>
+        <mesh position={[-10, 5, 0]} rotation={[0, Math.PI / 2, 0]} scale={[10, 10, 1]}>
+          <planeGeometry />
+          <meshBasicMaterial color="#00ff00" />
+        </mesh>
+        <mesh position={[10, 5, 0]} rotation={[0, -Math.PI / 2, 0]} scale={[10, 10, 1]}>
+          <planeGeometry />
+          <meshBasicMaterial color="#a855f7" />
+        </mesh>
+      </Environment>
       <Robot targetRotY={targetRotY} scrollState={scrollState} />
     </>
   )
