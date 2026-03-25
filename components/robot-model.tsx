@@ -37,28 +37,23 @@ function Robot({ onReady }: { onReady?: (box: THREE.Box3) => void }) {
         mesh.castShadow = true
         mesh.receiveShadow = true
 
-        // Upgrade material to PhysicalMaterial for a premium look
+        // Apply completely matte materials and REMOVE the default texture map
+        // so our custom colors are fully visible on the website.
         if (mesh.material) {
           const oldMat = mesh.material as THREE.MeshStandardMaterial
-          const newMat = new THREE.MeshPhysicalMaterial({
-            color: new THREE.Color("#111111"), // Dark graphite
-            metalness: 0.8,
-            roughness: 0.2,
-            clearcoat: 0.5,
-            clearcoatRoughness: 0.2,
-            envMapIntensity: 1.5,
+          const newMat = new THREE.MeshLambertMaterial({
+            color: new THREE.Color("#ffffff"), // Stark white premium body
+            map: null, // Removed texture map to force custom colors
           })
 
           if (oldMat.name.toLowerCase().includes("black") || oldMat.color.getHex() < 0x222222) {
-            newMat.color.setHex(0x050505)
-            newMat.roughness = 0.1
-            newMat.metalness = 0.9
+            newMat.color.setHex(0x0f172a) // Slate 900 for joints and dark parts
           }
 
           if (oldMat.name.toLowerCase().includes("screen") || child.name.toLowerCase().includes("face")) {
-            newMat.color.setHex(0x222222)
-            newMat.emissive = new THREE.Color("#00ff00")
-            newMat.emissiveIntensity = 0.5
+            newMat.color.setHex(0xf26722) // ASCI brand orange for the face
+            newMat.emissive = new THREE.Color("#f26722")
+            newMat.emissiveIntensity = 0.8 // Noticeable glow
           }
 
           mesh.material = newMat
@@ -242,25 +237,9 @@ function SceneContent() {
 
   return (
     <>
-      <ambientLight intensity={0.6} />
-
-      {/* Key light */}
-      <directionalLight
-        position={[5, 8, 5]}
-        intensity={1.3}
-        castShadow
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
-        color="#fff5ee"
-      />
-
-      {/* Fill light */}
-      <directionalLight position={[-4, 4, -2]} intensity={0.4} color="#e0e8ff" />
-
-      {/* Rim / accent from behind */}
-      <pointLight position={[0, 3, -4]} intensity={0.5} color="#f26722" distance={10} decay={2} />
-
-      <Environment preset="studio" />
+      {/* Soft evenly distributed lighting to prevent harsh reflections */}
+      <ambientLight intensity={1.8} color="#ffffff" />
+      <directionalLight position={[0, 10, 0]} intensity={0.4} color="#ffffff" />
 
       <ContactShadows
         position={[0, shadowY, 0]}
@@ -289,7 +268,6 @@ export function RobotScene() {
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         style={{ background: "transparent" }}
-        shadows
       >
         <SceneContent />
       </Canvas>

@@ -1,15 +1,13 @@
 "use client"
 
-import { ArrowRight, Terminal, Github, Twitter, Linkedin, Youtube, Zap } from "lucide-react"
+import { ArrowRight, ArrowUp, Terminal, Github, Twitter, Linkedin, Youtube, Zap } from "lucide-react"
 import { SectionBot } from "@/components/section-bot"
 import { RobotDock } from "@/components/robot-dock"
 import { useState, useRef, useEffect } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger)
-}
+if (typeof window !== "undefined") { gsap.registerPlugin(ScrollTrigger) }
 
 const footerColumns = [
   {
@@ -66,8 +64,15 @@ const socialLinks = [
 export function Footer({ showCTA = false }: { showCTA?: boolean }) {
   const [email, setEmail] = useState("")
   const [submitted, setSubmitted] = useState(false)
+  const [showTop, setShowTop] = useState(false)
   const ctaRef = useRef<HTMLDivElement>(null)
   const linksRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 600)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -96,18 +101,25 @@ export function Footer({ showCTA = false }: { showCTA?: boolean }) {
   }
 
   return (
-    <footer id="footer" className="relative border-t border-accent/10 bg-card">
+    <footer id="footer" className="relative border-t border-accent/10 bg-card overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-grid-cyber opacity-10" aria-hidden="true" />
-      {/* Cyberpunk corners */}
       <div className="pointer-events-none absolute left-4 top-4 h-12 w-12 border-l-2 border-t-2 border-accent/10" aria-hidden="true" />
       <div className="pointer-events-none absolute bottom-4 right-4 h-12 w-12 border-b-2 border-r-2 border-accent/10" aria-hidden="true" />
 
-      {/* CTA / Waitlist — only on landing page */}
+      {/* CTA / Waitlist */}
       {showCTA && (
-        <div className="relative mx-auto max-w-7xl px-5 py-20 lg:px-8 lg:py-28">
-          <div ref={ctaRef} className="cyber-corner relative mx-auto max-w-2xl overflow-hidden border border-border bg-background p-8 sm:p-12">
-            {/* Accent glow */}
-            <div className="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-accent/10 blur-3xl" aria-hidden="true" />
+        <div className="relative mx-auto max-w-7xl px-5 py-20 lg:px-8 lg:py-24">
+          <div ref={ctaRef} className="cyber-corner relative mx-auto max-w-2xl overflow-hidden border border-accent/20 p-8 sm:p-12"
+            style={{ background: "rgba(9,9,11,0.96)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+          >
+            {/* Animated gradient top */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 overflow-hidden">
+              <div className="h-full animate-shimmer bg-gradient-to-r from-transparent via-accent/70 to-transparent" />
+            </div>
+
+            {/* Aurora glow */}
+            <div className="aurora-orb aurora-orb-accent pointer-events-none absolute -right-16 -top-16 h-40 w-40 opacity-60" aria-hidden="true" />
+
             {/* HUD corners */}
             <div className="absolute left-2 top-2 h-4 w-4 border-l border-t border-accent/30" aria-hidden="true" />
             <div className="absolute bottom-2 right-2 h-4 w-4 border-b border-r border-accent/30" aria-hidden="true" />
@@ -136,16 +148,16 @@ export function Footer({ showCTA = false }: { showCTA?: boolean }) {
                 placeholder="developer@email.com"
                 required
                 suppressHydrationWarning
-                className="flex-1 border border-border bg-card px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="flex-1 border border-border bg-background px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground/50 transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
               />
               <button
                 type="submit"
                 suppressHydrationWarning
-                className="group flex items-center justify-center gap-2 bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-lg shadow-accent/20 transition-all hover:shadow-accent/40 hover:brightness-110"
+                className="group flex items-center justify-center gap-2 animate-shimmer bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-lg shadow-accent/20 transition-all hover:shadow-accent/40 hover:shadow-xl"
                 style={{ clipPath: "polygon(0 0, 100% 0, 100% 70%, 88% 100%, 0 100%)" }}
               >
-                {submitted ? "Joined!" : "Join"}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                {submitted ? "Joined! ✓" : "Join"}
+                {!submitted && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
               </button>
             </form>
 
@@ -159,11 +171,12 @@ export function Footer({ showCTA = false }: { showCTA?: boolean }) {
       )}
 
       {/* Footer links grid */}
-      <div ref={linksRef} className="relative mx-auto max-w-7xl border-t border-border px-5 py-14 lg:px-8">
+      <div ref={linksRef} className="relative mx-auto max-w-7xl border-t border-border/50 px-5 py-14 lg:px-8">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           {footerColumns.map((col) => (
             <div key={col.heading} className="footer-col">
-              <h3 className="mb-4 font-mono text-sm font-bold uppercase tracking-wider text-foreground">
+              <h3 className="mb-4 font-mono text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                <span className="h-px w-4 bg-accent/50" />
                 {col.heading}
               </h3>
               <ul className="flex flex-col gap-2.5">
@@ -185,21 +198,15 @@ export function Footer({ showCTA = false }: { showCTA?: boolean }) {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
+        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-border/50 pt-8 sm:flex-row">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center bg-accent" style={{ clipPath: "polygon(0 0, 100% 0, 100% 70%, 75% 100%, 0 100%)" }}>
               <Terminal className="h-4 w-4 text-accent-foreground" />
             </div>
             <span className="text-lg font-black tracking-tight text-foreground cyber-glitch">ASCI</span>
-            <span className="border border-accent/30 bg-accent/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-widest text-accent">
-              LMS
-            </span>
+            <span className="border border-accent/30 bg-accent/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-widest text-accent">LMS</span>
             <SectionBot variant="footer" className="hidden sm:inline-flex ml-2" />
-            <RobotDock
-              id="footer"
-              label="SLEEP-BOT"
-              className="hidden lg:flex h-[160px] w-[130px] shrink-0 ml-4"
-            />
+            <RobotDock id="footer" label="SLEEP-BOT" className="hidden lg:flex h-[160px] w-[130px] shrink-0 ml-4" />
           </div>
 
           <div className="flex items-center gap-3">
@@ -207,7 +214,7 @@ export function Footer({ showCTA = false }: { showCTA?: boolean }) {
               <a
                 key={s.label}
                 href={s.href}
-                className="flex h-9 w-9 items-center justify-center border border-border text-muted-foreground transition-colors hover:border-accent/30 hover:bg-secondary hover:text-foreground"
+                className="flex h-9 w-9 items-center justify-center border border-border text-muted-foreground transition-all hover:border-accent/40 hover:bg-accent/5 hover:text-accent hover:scale-110"
                 aria-label={s.label}
               >
                 <s.icon className="h-4 w-4" />
@@ -216,13 +223,26 @@ export function Footer({ showCTA = false }: { showCTA?: boolean }) {
           </div>
 
           <p className="font-mono text-xs text-muted-foreground">
-            2026 ASCI. Built for developers, by developers.
+            © 2026 ASCI. Built for developers, by developers.
           </p>
         </div>
       </div>
 
       {/* Bottom accent bar */}
-      <div className="h-0.5 w-full bg-accent" />
+      <div className="relative h-0.5 w-full overflow-hidden bg-accent/30">
+        <div className="h-full animate-shimmer bg-gradient-to-r from-transparent via-accent to-transparent" />
+      </div>
+
+      {/* Back to top */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        suppressHydrationWarning
+        className={`fixed bottom-8 right-8 z-40 flex h-10 w-10 items-center justify-center border border-accent/50 bg-card/90 text-accent backdrop-blur-sm transition-all duration-300 hover:bg-accent hover:text-accent-foreground hover:shadow-[0_0_20px_rgba(242,103,34,0.4)] ${showTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
+        aria-label="Back to top"
+        style={{ clipPath: "polygon(0 0, 100% 0, 100% 70%, 80% 100%, 0 100%)" }}
+      >
+        <ArrowUp className="h-4 w-4" />
+      </button>
     </footer>
   )
 }

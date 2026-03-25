@@ -2,6 +2,7 @@ import { Navbar } from "@/components/navbar"
 import { Hero } from "@/components/hero"
 import { FeaturedDSACourse } from "@/components/featured-dsa-course"
 import { LandingMarquee } from "@/components/landing-marquee"
+import { StatsCounter } from "@/components/stats-counter"
 import { Courses } from "@/components/courses"
 import { Features } from "@/components/features"
 import { DSAVisualizerWrapper } from "@/components/dsa-visualizer-wrapper"
@@ -24,6 +25,7 @@ export default async function Home() {
       <Hero />
       <FeaturedDSACourse />
       <LandingMarquee />
+      <StatsCounter />
       <Courses />
       <Features stats={stats} />
       <DSAVisualizerWrapper />
