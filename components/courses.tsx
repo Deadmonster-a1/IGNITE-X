@@ -160,6 +160,21 @@ export function Courses() {
           slug: "dsa-custom"
         } as any)
 
+        // Inject the Java Beginners Course
+        mapped.unshift({
+          id: "JAVA-B-001",
+          title: "Java for Beginners",
+          description: "Start your programming journey here. Learn the absolute basics of Java, programming concepts, and logic building.",
+          category: "Backend",
+          level: "Beginner",
+          weeks: "10 hours",
+          lessons: 4,
+          projects: 1,
+          icon: TerminalSquare,
+          is_premium: false,
+          slug: "java-for-beginners"
+        } as any)
+
         setInitialCourses(mapped as any)
       }
     }
@@ -259,7 +274,7 @@ function CourseCard({ course, userTier }: { course: CourseType, userTier: string
   // Gate premium courses for non-architect users
   const isPremiumLocked = course.is_premium && userTier !== "architect"
   const courseSlug = (course as any).slug || course.id
-  const href = isPremiumLocked ? "/pricing" : (courseSlug === "dsa-custom" ? "/programs/dsa" : `/courses/${courseSlug}/learn`)
+  const href = isPremiumLocked ? "/pricing" : (courseSlug === "dsa-custom" ? "/programs/dsa" : courseSlug === "java-for-beginners" ? "/courses/java-for-beginners/learn" : `/courses/${courseSlug}/learn`)
 
   const borderColor = isJava ? 'border-[#ff4b00]/50' : isPython ? 'border-[#facc15]/50' : 'border-border hover:border-accent/50'
 

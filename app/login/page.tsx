@@ -118,6 +118,7 @@ export default function LoginPage() {
                     <div className="flex border border-border mb-6">
                         <button
                             type="button"
+                            suppressHydrationWarning
                             onClick={() => { setLoginMode("password"); setError(null) }}
                             className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${loginMode === "password"
                                 ? "bg-accent text-accent-foreground"
@@ -129,6 +130,7 @@ export default function LoginPage() {
                         </button>
                         <button
                             type="button"
+                            suppressHydrationWarning
                             onClick={() => { setLoginMode("otp"); setError(null) }}
                             className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${loginMode === "otp"
                                 ? "bg-accent text-accent-foreground"
@@ -159,6 +161,7 @@ export default function LoginPage() {
                                         name="email"
                                         type="email"
                                         required
+                                        suppressHydrationWarning
                                         className="w-full bg-secondary/50 border border-border px-10 py-2.5 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
                                         placeholder="admin@example.com"
                                     />
@@ -183,6 +186,7 @@ export default function LoginPage() {
                                         name="password"
                                         type="password"
                                         required
+                                        suppressHydrationWarning
                                         className="w-full bg-secondary/50 border border-border px-10 py-2.5 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
                                         placeholder="••••••••"
                                     />
@@ -191,6 +195,7 @@ export default function LoginPage() {
 
                             <button
                                 type="submit"
+                                suppressHydrationWarning
                                 disabled={isLoading || isGoogleLoading}
                                 className="w-full bg-foreground text-background font-semibold py-2.5 text-sm hover:bg-foreground/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
                                 style={{ clipPath: "polygon(0 0, 100% 0, 100% 75%, 95% 100%, 0 100%)" }}
@@ -208,6 +213,7 @@ export default function LoginPage() {
                                     </div>
                                     <input
                                         type="email"
+                                        suppressHydrationWarning
                                         value={otpEmail}
                                         onChange={e => { setOtpEmail(e.target.value); setError(null) }}
                                         className="w-full bg-secondary/50 border border-border px-10 py-2.5 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
@@ -220,6 +226,7 @@ export default function LoginPage() {
                             </p>
                             <button
                                 type="button"
+                                suppressHydrationWarning
                                 onClick={handleSendOtp}
                                 disabled={isSendingOtp || isGoogleLoading}
                                 className="w-full bg-accent text-accent-foreground font-semibold py-2.5 text-sm hover:bg-accent/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
@@ -241,6 +248,7 @@ export default function LoginPage() {
 
                     <button
                         type="button"
+                        suppressHydrationWarning
                         onClick={handleGoogleSignIn}
                         disabled={isLoading || isGoogleLoading}
                         className="w-full border border-border bg-card hover:bg-secondary text-foreground font-medium py-2.5 text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"

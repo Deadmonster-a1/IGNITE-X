@@ -97,6 +97,7 @@ export default function SignupPage() {
                                     name="name"
                                     type="text"
                                     required
+                                    suppressHydrationWarning
                                     className="w-full bg-secondary/50 border border-border px-10 py-2.5 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
                                     placeholder="John Doe"
                                 />
@@ -113,6 +114,7 @@ export default function SignupPage() {
                                     name="email"
                                     type="email"
                                     required
+                                    suppressHydrationWarning
                                     className="w-full bg-secondary/50 border border-border px-10 py-2.5 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
                                     placeholder="admin@example.com"
                                 />
@@ -130,6 +132,7 @@ export default function SignupPage() {
                                     type="password"
                                     required
                                     minLength={6}
+                                    suppressHydrationWarning
                                     className="w-full bg-secondary/50 border border-border px-10 py-2.5 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
                                     placeholder="••••••••"
                                 />
@@ -138,6 +141,7 @@ export default function SignupPage() {
 
                         <button
                             type="submit"
+                            suppressHydrationWarning
                             disabled={isLoading || isGoogleLoading}
                             className="w-full bg-accent text-accent-foreground font-semibold py-2.5 text-sm hover:bg-accent/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
                             style={{ clipPath: "polygon(0 0, 100% 0, 100% 75%, 95% 100%, 0 100%)" }}
@@ -157,6 +161,7 @@ export default function SignupPage() {
 
                     <button
                         type="button"
+                        suppressHydrationWarning
                         onClick={handleGoogleSignIn}
                         disabled={isLoading || isGoogleLoading}
                         className="w-full border border-border bg-card hover:bg-secondary text-foreground font-medium py-2.5 text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
